@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Complete Payment — SparkVest</title>
+  <!-- Tailwind config with modern fintech theme -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#3D5BA9', // Modern blue
+            secondary: '#35D0BA', // Teal accent
+            dark: '#1A2A43',     // Dark blue
+            light: '#F5F9FF',    // Light background
+            accent: '#FF7E5F'    // Orange accent
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif']
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.5s ease-in-out',
+            'slide-up': 'slideUp 0.5s ease-out',
+            'pulse-slow': 'pulse 3s infinite',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            slideUp: {
+              '0%': { transform: 'translateY(20px)', opacity: '0' },
+              '100%': { transform: 'translateY(0)', opacity: '1' },
+            }
+          },
+        }
+      }
+    }
+  </script>
+  <!-- Tailwind v4 Play CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4" crossorigin="anonymous"></script>
+  <!-- Razorpay JS SDK -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <!-- Inter font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="bg-light min-h-screen font-sans flex flex-col">
+
+  <!-- Navigation -->
+  <nav class="bg-white shadow-md sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <a href="/" class="flex items-center">
+        <svg class="w-8 h-8 text-primary" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M11 2.05V13h2V2.05c5.053.501 9 4.765 9 9.95 0 5.523-4.477 10-10 10S2 17.523 2 12c0-5.185 3.947-9.449 9-9.95z"/>
+        </svg>
+        <span class="ml-2 text-2xl font-bold bg-gradient-to-r from-primary to-secondary inline-block text-transparent bg-clip-text">SparkVest</span>
+      </a>
+
+      <div class="hidden md:flex items-center space-x-8">
+        <a href="/" class="text-dark hover:text-primary transition-colors">Home</a>
+        <a href="/dashboard" class="text-dark hover:text-primary transition-colors">Dashboard</a>
+        <div class="relative group">
+          <button class="flex items-center text-dark hover:text-primary transition-colors">
+            <span>{{ user.username }}</span>
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <div class="absolute right-0 w-48 mt-2 bg-white rounded-lg shadow-lg py-2 z-10 hidden group-hover:block">
+            <a href="/profile" class="block px-4 py-2 text-dark hover:bg-light hover:text-primary">My Profile</a>
+            <a href="/dashboard" class="block px-4 py-2 text-dark hover:bg-light hover:text-primary">Dashboard</a>
+            <a href="/logout" class="block px-4 py-2 text-dark hover:bg-light hover:text-primary">Logout</a>
+          </div>
+        </div>
+      </div>
+
+      <button id="menu-btn" class="md:hidden text-2xl focus:outline-none focus:ring-2 focus:ring-primary rounded p-1 transition-colors hover:bg-light">
+        ☰
+      </button>
+    </div>
+    <div id="mobile-menu" class="hidden md:hidden bg-white p-4 shadow-lg">
+      <div class="flex flex-col space-y-3">
+        <a href="/" class="text-dark hover:text-primary transition-colors py-2">Home</a>
+        <a href="/dashboard" class="text-dark hover:text-primary transition-colors py-2">Dashboard</a>
+        <a href="/profile" class="text-dark hover:text-primary transition-colors py-2">My Profile</a>
+        <a href="/logout" class="text-dark hover:text-primary transition-colors py-2">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="container mx-auto px-4 py-8 animate-fade-in">
+    <div class="max-w-2xl mx-auto">
+      <!-- Payment Card -->
+      <div class="bg-white rounded-xl shadow-sm p-6 md:p-8 animate-slide-up">
+        <div class="bg-gradient-to-r from-primary to-secondary p-6 text-white">
+          <h1 class="text-2xl font-bold">Complete Your Investment</h1>
+          <p class="mt-1 opacity-90">You're about to invest in {{ project.title }}</p>
+        </div>
+        
+        <div class="p-6">
+          <!-- Project Summary -->
+          <div class="flex items-center mb-6 pb-6 border-b border-gray-200">
+            {% if project.image_url %}
+            <img src="{{ project.image_url }}" alt="{{ project.title }}" class="w-16 h-16 rounded-lg object-cover mr-4">
+            {% else %}
+            <div class="w-16 h-16 bg-gradient-to-r from-primary to-secondary rounded-lg flex items-center justify-center text-white font-bold text-xl mr-4">
+              {{ project.title[0] }}
+            </div>
+            {% endif %}
+            <div>
+              <h2 class="font-bold text-lg text-dark">{{ project.title }}</h2>
+              <p class="text-gray-600 text-sm">
+                {% if project.return_type == 'stake' %}
+                <span class="text-blue-600 font-medium">Equity Stake</span>
+                {% else %}
+                <span class="text-green-600 font-medium">Reward-Based</span>
+                {% endif %}
+                • {{ project.days_remaining }} days left
+              </p>
+            </div>
+          </div>
+          
+          <!-- Payment Details -->
+          <div class="space-y-4">
+            <div class="flex justify-between items-baseline mb-2">
+              <span class="text-sm text-gray-600">Amount:</span>
+              <span class="font-semibold text-lg">₹{{ "%.2f"|format(amount) }}</span>
+            </div>
+            
+            {% if project.return_type == 'stake' %}
+            <div class="flex justify-between items-center">
+              <span class="text-gray-600">Equity Stake (est.)</span>
+              <span class="font-bold text-blue-600">{{ ((amount / project.goal) * 100)|round(2) }}%</span>
+            </div>
+            <div class="bg-blue-50 p-4 rounded-lg border border-blue-100 mb-4">
+              <div class="flex items-start">
+                <svg class="w-5 h-5 text-blue-600 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div>
+                  <p class="text-sm text-blue-800 font-medium">Equity Investment Notice</p>
+                  <p class="text-xs text-blue-700 mt-1">You will receive a digital stake certificate after your payment is processed. This certificate documents your ownership percentage in this venture.</p>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+            
+            <div class="pt-4 border-t border-gray-200">
+              <button id="pay-button" class="w-full bg-primary text-white font-medium py-3 px-6 rounded-lg hover:bg-primary/90 transition shadow-md flex items-center justify-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2h10z"></path>
+                </svg>
+                Pay ₹{{ "%.2f"|format(amount) }}
+              </button>
+              <a href="/project/{{ project.id }}" class="mt-4 block text-center text-primary font-medium hover:underline">Cancel Payment</a>
+              <p class="mt-4 text-xs text-gray-500 text-center">
+                By proceeding with payment, you agree to SparkVest's <a href="#" class="text-primary hover:underline">Terms</a> and <a href="#" class="text-primary hover:underline">Investor Guidelines</a>.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Back Button -->
+      <div class="mt-6 text-center">
+        <a href="/projects/{{ project.id }}" class="text-primary hover:underline flex items-center justify-center">
+          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+          Back to Project
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-gray-800 text-white py-6 mt-auto">
+    <div class="container mx-auto px-4 text-center">
+      <p class="text-gray-400">&copy; 2025 SparkVest. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    // Mobile menu toggle with animation
+    const menuBtn = document.getElementById('menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    
+    menuBtn.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+      if (!mobileMenu.classList.contains('hidden')) {
+        mobileMenu.classList.add('animate-slide-up');
+      }
+    });
+    
+    // Razorpay Integration
+    document.getElementById('rzp-button').addEventListener('click', function() {
+      var options = {
+        key: "{{ razorpay_key }}",
+        amount: {{ amount_in_paise }},
+        currency: 'INR',
+        name: 'SparkVest',
+        description: 'Investment in {{ project.title }}',
+        order_id: "{{ razorpay_order_id }}",
+        handler: function (response) {
+          window.location.href = `/payment-success?project_id={{ project_id }}&amount={{ amount }}&razorpay_payment_id=${response.razorpay_payment_id}&razorpay_order_id=${response.razorpay_order_id}&razorpay_signature=${response.razorpay_signature}`;
+        },
+        prefill: {
+          name: "{{ user.username }}",
+          email: "{{ user.email }}"
+        },
+        theme: {
+          color: "#3D5BA9"
+        }
+      };
+      
+      var rzp = new Razorpay(options);
+      rzp.open();
+    });
+  </script>
+</body>
+</html> 

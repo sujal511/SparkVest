@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Edit User — SparkVest Admin</title>
+  <!-- Tailwind config with modern fintech theme -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#3D5BA9', // Modern blue
+            secondary: '#35D0BA', // Teal accent
+            dark: '#1A2A43',     // Dark blue
+            light: '#F5F9FF',    // Light background
+            accent: '#FF7E5F'    // Orange accent
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Tailwind v4 Play CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4" crossorigin="anonymous"></script>
+  <!-- Inter font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="bg-light min-h-screen font-sans flex flex-col">
+
+  <!-- Navigation -->
+  <nav class="bg-white shadow-md sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <a href="/" class="flex items-center">
+        <svg class="w-8 h-8 text-primary" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M11 2.05V13h2V2.05c5.053.501 9 4.765 9 9.95 0 5.523-4.477 10-10 10S2 17.523 2 12c0-5.185 3.947-9.449 9-9.95z"/>
+        </svg>
+        <span class="ml-2 text-2xl font-bold bg-gradient-to-r from-primary to-secondary inline-block text-transparent bg-clip-text">SparkVest</span>
+      </a>
+
+      <div class="hidden md:flex items-center space-x-8">
+        <a href="/admin" class="text-dark hover:text-primary transition-colors">Dashboard</a>
+        <a href="/admin/projects" class="text-dark hover:text-primary transition-colors">Projects</a>
+        <a href="/admin/users" class="text-dark hover:text-primary transition-colors">Users</a>
+        <div class="relative group">
+          <button class="flex items-center text-dark hover:text-primary transition-colors">
+            <span>{{ user.username }}</span>
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <div class="absolute right-0 w-48 mt-2 bg-white rounded-lg shadow-lg py-2 z-10 hidden group-hover:block">
+            <a href="/logout" class="block px-4 py-2 text-dark hover:bg-light hover:text-primary">Logout</a>
+          </div>
+        </div>
+      </div>
+
+      <button id="menu-btn" class="md:hidden text-2xl focus:outline-none">
+        ☰
+      </button>
+    </div>
+    <div id="mobile-menu" class="hidden md:hidden bg-white p-4 shadow-lg">
+      <div class="flex flex-col space-y-3">
+        <a href="/admin" class="text-dark hover:text-primary transition-colors py-2">Dashboard</a>
+        <a href="/admin/projects" class="text-dark hover:text-primary transition-colors py-2">Projects</a>
+        <a href="/admin/users" class="text-dark hover:text-primary transition-colors py-2">Users</a>
+        <a href="/logout" class="text-dark hover:text-primary transition-colors py-2">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Content -->
+  <main class="container mx-auto px-4 py-8">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="{% if category == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %} p-4 rounded-lg mb-6">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- Breadcrumbs -->
+    <div class="flex items-center mb-6 text-sm">
+      <a href="/admin" class="text-gray-500 hover:text-primary">Dashboard</a>
+      <span class="mx-2 text-gray-500">/</span>
+      <a href="/admin/users" class="text-gray-500 hover:text-primary">Users</a>
+      <span class="mx-2 text-gray-500">/</span>
+      <span class="text-gray-700 font-medium">Edit User</span>
+    </div>
+
+    <!-- Edit User Form -->
+    <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+      <h2 class="text-2xl font-bold text-dark mb-6">Edit User</h2>
+      
+      <form action="/admin/users/{{ edit_user.id }}/edit" method="POST">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div>
+            <label for="username" class="block text-gray-700 font-medium mb-2">Username</label>
+            <input type="text" id="username" name="username" value="{{ edit_user.username }}" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+          </div>
+          
+          <div>
+            <label for="email" class="block text-gray-700 font-medium mb-2">Email</label>
+            <input type="email" id="email" name="email" value="{{ edit_user.email }}" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+          </div>
+          
+          <div>
+            <label for="user_type" class="block text-gray-700 font-medium mb-2">User Type</label>
+            <select id="user_type" name="user_type" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+              <option value="investor" {% if edit_user.user_type == 'investor' %}selected{% endif %}>Investor</option>
+              <option value="idea_owner" {% if edit_user.user_type == 'idea_owner' %}selected{% endif %}>Idea Owner</option>
+              <option value="admin" {% if edit_user.user_type == 'admin' %}selected{% endif %}>Admin</option>
+            </select>
+          </div>
+          
+          <div>
+            <label for="new_password" class="block text-gray-700 font-medium mb-2">New Password (leave blank to keep current)</label>
+            <input type="password" id="new_password" name="new_password" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Set new password...">
+          </div>
+        </div>
+        
+        <div class="mt-6 flex justify-end">
+          <button type="submit" class="bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition font-medium">Save Changes</button>
+        </div>
+      </form>
+    </div>
+    
+    <!-- User Details -->
+    <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+      <h2 class="text-xl font-bold text-dark mb-4">User Details</h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <h3 class="text-lg font-semibold mb-3">Account Information</h3>
+          <div class="space-y-3">
+            <div>
+              <p class="text-gray-500 text-sm">User ID</p>
+              <p class="font-medium">{{ edit_user.id }}</p>
+            </div>
+            <div>
+              <p class="text-gray-500 text-sm">Created At</p>
+              <p class="font-medium">{{ edit_user.created_at.strftime('%b %d, %Y %H:%M') }}</p>
+            </div>
+            <div>
+              <p class="text-gray-500 text-sm">User Type</p>
+              <p class="font-medium">
+                <span class="{% if edit_user.user_type == 'admin' %}bg-primary text-white{% elif edit_user.user_type == 'idea_owner' %}bg-accent text-white{% else %}bg-gray-100 text-gray-800{% endif %} px-2 py-1 rounded-full text-xs">
+                  {{ edit_user.user_type }}
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <div>
+          <h3 class="text-lg font-semibold mb-3">Statistics</h3>
+          <div class="space-y-3">
+            <div>
+              <p class="text-gray-500 text-sm">Projects Created</p>
+              <p class="font-medium">{{ edit_user.projects|length }}</p>
+            </div>
+            <div>
+              <p class="text-gray-500 text-sm">Investments Made</p>
+              <p class="font-medium">{{ edit_user.investments|length }}</p>
+            </div>
+            <div>
+              <p class="text-gray-500 text-sm">Total Amount Invested</p>
+              <p class="font-medium">${{ "%.2f"|format(edit_user.investments|sum(attribute='amount')) }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Danger Zone -->
+    <div class="bg-red-50 rounded-xl border border-red-200 p-6">
+      <h2 class="text-xl font-bold text-red-800 mb-4">Danger Zone</h2>
+      <p class="text-red-700 mb-4">Deleting this user will permanently remove their account and all associated data. This action cannot be undone.</p>
+      
+      <form action="/admin/users/{{ edit_user.id }}/delete" method="POST" onsubmit="return confirm('Are you sure you want to delete this user? This action cannot be undone.');">
+        <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors">
+          Delete User
+        </button>
+      </form>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-gray-800 text-white py-6 mt-8">
+    <div class="container mx-auto px-4">
+      <div class="text-center">
+        <p class="text-gray-400">&copy; 2025 SparkVest Admin Panel. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Mobile menu toggle
+    const menuBtn = document.getElementById('menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    
+    menuBtn.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+  </script>
+</body>
+</html> 

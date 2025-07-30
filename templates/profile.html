@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Profile — SparkVest</title>
+  <!-- Tailwind config with modern fintech theme -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#3D5BA9', // Modern blue
+            secondary: '#35D0BA', // Teal accent
+            dark: '#1A2A43',     // Dark blue
+            light: '#F5F9FF',    // Light background
+            accent: '#FF7E5F'    // Orange accent
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif']
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.5s ease-in-out',
+            'slide-up': 'slideUp 0.5s ease-out',
+            'pulse-slow': 'pulse 3s infinite'
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' }
+            },
+            slideUp: {
+              '0%': { transform: 'translateY(20px)', opacity: '0' },
+              '100%': { transform: 'translateY(0)', opacity: '1' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Tailwind v4 Play CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4" crossorigin="anonymous"></script>
+  <!-- Inter font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="bg-light min-h-screen font-sans flex flex-col">
+
+  <!-- Navigation -->
+  <nav class="bg-white shadow-md sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <a href="/" class="flex items-center">
+        <svg class="w-8 h-8 text-primary" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M11 2.05V13h2V2.05c5.053.501 9 4.765 9 9.95 0 5.523-4.477 10-10 10S2 17.523 2 12c0-5.185 3.947-9.449 9-9.95z"/>
+        </svg>
+        <span class="ml-2 text-2xl font-bold bg-gradient-to-r from-primary to-secondary inline-block text-transparent bg-clip-text">SparkVest</span>
+      </a>
+
+      <div class="hidden md:flex items-center space-x-8">
+        <a href="/" class="text-dark hover:text-primary transition-colors">Home</a>
+        <a href="/dashboard" class="text-dark hover:text-primary transition-colors">Dashboard</a>
+        {% if user.user_type == 'investor' %}
+        <a href="/browse-ideas" class="text-dark hover:text-primary transition-colors">Browse Ideas</a>
+        {% elif user.user_type == 'idea_owner' %}
+        <a href="/submit-idea" class="text-dark hover:text-primary transition-colors">Submit Idea</a>
+        {% elif user.user_type == 'admin' %}
+        <a href="/admin" class="text-dark hover:text-primary transition-colors">Admin Panel</a>
+        {% endif %}
+        <div class="relative group">
+          <button class="flex items-center text-dark hover:text-primary transition-colors">
+            <span>{{ user.username }}</span>
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <div class="absolute right-0 w-48 mt-2 bg-white rounded-lg shadow-lg py-2 z-10 hidden group-hover:block">
+            <a href="/profile" class="block px-4 py-2 text-dark bg-light hover:text-primary">My Profile</a>
+            <a href="/dashboard" class="block px-4 py-2 text-dark hover:bg-light hover:text-primary">Dashboard</a>
+            <a href="/logout" class="block px-4 py-2 text-dark hover:bg-light hover:text-primary">Logout</a>
+          </div>
+        </div>
+      </div>
+
+      <button id="menu-btn" class="md:hidden text-2xl focus:outline-none focus:ring-2 focus:ring-primary rounded p-1 transition-colors hover:bg-light">
+        ☰
+      </button>
+    </div>
+    <div id="mobile-menu" class="hidden md:hidden bg-white p-4 shadow-lg">
+      <div class="flex flex-col space-y-3">
+        <a href="/" class="text-dark hover:text-primary transition-colors py-2">Home</a>
+        <a href="/dashboard" class="text-dark hover:text-primary transition-colors py-2">Dashboard</a>
+        {% if user.user_type == 'investor' %}
+        <a href="/browse-ideas" class="text-dark hover:text-primary transition-colors py-2">Browse Ideas</a>
+        {% elif user.user_type == 'idea_owner' %}
+        <a href="/submit-idea" class="text-dark hover:text-primary transition-colors py-2">Submit Idea</a>
+        {% elif user.user_type == 'admin' %}
+        <a href="/admin" class="text-dark hover:text-primary transition-colors py-2">Admin Panel</a>
+        {% endif %}
+        <a href="/profile" class="text-dark hover:text-primary transition-colors py-2">My Profile</a>
+        <a href="/logout" class="text-dark hover:text-primary transition-colors py-2">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Page Header -->
+  <header class="bg-white shadow-sm">
+    <div class="container mx-auto px-4 py-8">
+      <h1 class="text-2xl md:text-3xl font-bold text-dark">My Profile</h1>
+      <p class="text-gray-600 mt-1">View and update your account information</p>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container mx-auto px-4 py-8 animate-fade-in">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="{% if category == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %} p-4 rounded-lg mb-6">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <!-- Left Column - Profile Summary -->
+      <div class="md:col-span-1">
+        <div class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-all duration-300 animate-slide-up">
+          <div class="flex flex-col items-center text-center mb-6">
+            <div class="w-24 h-24 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center text-white text-3xl font-bold mb-4">
+              {{ user.username[0].upper() }}
+            </div>
+            <h2 class="text-xl font-bold">{{ user.username }}</h2>
+            <p class="text-gray-600">{{ user.email }}</p>
+            <div class="mt-2">
+              {% if user.user_type == 'admin' %}
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                  Admin
+                </span>
+              {% elif user.user_type == 'investor' %}
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                  Investor
+                </span>
+              {% elif user.user_type == 'idea_owner' %}
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                  Idea Owner
+                </span>
+              {% endif %}
+            </div>
+          </div>
+          
+          <div class="border-t border-gray-200 pt-6 text-center">
+            <p class="text-gray-700">
+              <span class="font-medium">Member since:</span><br>
+              {{ user.created_at.strftime('%B %d, %Y') }}
+            </p>
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-sm p-6 mt-6 hover:shadow-md transition-all duration-300 animate-slide-up" style="animation-delay: 0.1s">
+          <h3 class="font-bold text-lg mb-4">Account Stats</h3>
+          
+          <div class="space-y-4">
+            {% if user.user_type == 'investor' %}
+              {% set investments = user.investments|length %}
+              <div class="flex justify-between items-center">
+                <span class="text-gray-600">Total Investments</span>
+                <span class="font-bold text-primary">{{ investments }}</span>
+              </div>
+              
+              {% set total_amount = namespace(value=0) %}
+              {% for investment in user.investments %}
+                {% set total_amount.value = total_amount.value + investment.amount %}
+              {% endfor %}
+              
+              <div class="flex justify-between items-center">
+                <span class="text-gray-600">Total Amount Invested</span>
+                <span class="font-bold text-primary">₹{{ "%.2f"|format(total_amount.value) }}</span>
+              </div>
+            {% elif user.user_type == 'idea_owner' %}
+              {% set projects = user.projects|length %}
+              <div class="flex justify-between items-center">
+                <span class="text-gray-600">Projects Submitted</span>
+                <span class="font-bold text-primary">{{ projects }}</span>
+              </div>
+              
+              {% set funded_projects = namespace(value=0) %}
+              {% for project in user.projects %}
+                {% if project_is_funded(project) %}
+                  {% set funded_projects.value = funded_projects.value + 1 %}
+                {% endif %}
+              {% endfor %}
+              
+              <div class="flex justify-between items-center">
+                <span class="text-gray-600">Successfully Funded</span>
+                <span class="font-bold text-primary">{{ funded_projects.value }}</span>
+              </div>
+            {% elif user.user_type == 'admin' %}
+              <div class="flex justify-between items-center">
+                <span class="text-gray-600">Role</span>
+                <span class="font-bold text-purple-600">Administrator</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-gray-600">Access Level</span>
+                <span class="font-bold text-purple-600">Full</span>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      
+      <!-- Right Column - Profile Form -->
+      <div class="md:col-span-2">
+        <div class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-all duration-300 animate-slide-up" style="animation-delay: 0.2s">
+          <h2 class="text-xl font-bold mb-6">Account Information</h2>
+          
+          <form action="/profile" method="POST" class="space-y-6">
+            <div>
+              <label for="username" class="block mb-2 text-sm font-medium text-dark">Username</label>
+              <input type="text" id="username" name="username" value="{{ user.username }}" required
+                     class="w-full bg-light border border-gray-300 text-dark rounded-lg py-3 px-4 focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-300">
+              <p class="mt-1 text-xs text-gray-500">This is how you'll appear to other users on the platform.</p>
+            </div>
+            
+            <div>
+              <label for="email" class="block mb-2 text-sm font-medium text-dark">Email Address</label>
+              <input type="email" id="email" name="email" value="{{ user.email }}" required
+                     class="w-full bg-light border border-gray-300 text-dark rounded-lg py-3 px-4 focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-300">
+              <p class="mt-1 text-xs text-gray-500">We'll use this email to communicate with you.</p>
+            </div>
+            
+            <div>
+              <label for="user_type" class="block mb-2 text-sm font-medium text-dark">Account Type</label>
+              <input type="text" id="user_type" value="{% if user.user_type == 'investor' %}Investor{% elif user.user_type == 'idea_owner' %}Idea Owner{% elif user.user_type == 'admin' %}Administrator{% endif %}" readonly
+                     class="w-full bg-gray-100 border border-gray-300 text-dark rounded-lg py-3 px-4 cursor-not-allowed">
+              <p class="mt-1 text-xs text-gray-500">Your account type determines what you can do on the platform.</p>
+            </div>
+            
+            <div class="border-t border-gray-200 pt-6 mt-6">
+              <h3 class="font-bold text-lg mb-4">Change Password</h3>
+              <p class="text-sm text-gray-600 mb-4">Leave these fields blank if you don't want to change your password.</p>
+              
+              <div class="space-y-4">
+                <div>
+                  <label for="current_password" class="block mb-2 text-sm font-medium text-dark">Current Password</label>
+                  <input type="password" id="current_password" name="current_password"
+                         class="w-full bg-light border border-gray-300 text-dark rounded-lg py-3 px-4 focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                </div>
+                
+                <div>
+                  <label for="new_password" class="block mb-2 text-sm font-medium text-dark">New Password</label>
+                  <input type="password" id="new_password" name="new_password"
+                         class="w-full bg-light border border-gray-300 text-dark rounded-lg py-3 px-4 focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                </div>
+                
+                <div>
+                  <label for="confirm_password" class="block mb-2 text-sm font-medium text-dark">Confirm New Password</label>
+                  <input type="password" id="confirm_password" name="confirm_password"
+                         class="w-full bg-light border border-gray-300 text-dark rounded-lg py-3 px-4 focus:ring-2 focus:ring-primary focus:border-primary transition-all">
+                </div>
+              </div>
+            </div>
+            
+            <div class="flex justify-end pt-6">
+              <button type="submit" class="bg-primary text-white font-medium py-2 px-4 rounded-lg hover:bg-primary/90 transition shadow-md">
+                Update Profile
+              </button>
+            </div>
+          </form>
+        </div>
+        
+        <!-- Account Activity -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mt-6 hover:shadow-md transition-all duration-300 animate-slide-up" style="animation-delay: 0.3s">
+          <h2 class="text-xl font-bold mb-6">Recent Activity</h2>
+          
+          {% if user.user_type == 'investor' and user.investments %}
+            <div class="space-y-4">
+              <h3 class="font-medium text-gray-700">Recent Investments</h3>
+              {% set investment_count = 0 %}
+              {% for investment in user.investments|sort(attribute='created_at', reverse=True) %}
+                {% if investment_count < 3 %}
+                <div class="mb-4 pb-4 border-b border-gray-200 last:border-0 last:pb-0 last:mb-0">
+                  <div class="flex justify-between items-start">
+                    <div>
+                      <h4 class="font-medium">{{ investment.project.title }}</h4>
+                      <p class="text-sm text-gray-600">{{ investment.created_at.strftime('%d %b %Y') }}</p>
+                    </div>
+                    <span class="text-primary font-medium">₹{{ investment.amount }}</span>
+                  </div>
+                  <div class="mt-2">
+                    <a href="/project/{{ investment.project.id }}" class="text-primary hover:underline text-sm">View Project</a>
+                  </div>
+                </div>
+                {% set investment_count = investment_count + 1 %}
+                {% endif %}
+              {% else %}
+                <p class="text-gray-600">No investments yet.</p>
+              {% endfor %}
+              
+              {% if user.investments|length > 3 %}
+                <div class="mt-4">
+                  <a href="/my-investments" class="text-primary hover:underline">View all investments</a>
+                </div>
+              {% endif %}
+            </div>
+          {% elif user.user_type == 'idea_owner' and user.projects %}
+            <div class="space-y-4">
+              <h3 class="font-medium text-gray-700">Your Projects</h3>
+              {% set counter = namespace(value=0) %}
+              {% for project in user.projects|sort(attribute='created_at', reverse=True) %}
+                {% if counter.value < 3 %}
+                <div class="border-b border-gray-200 pb-4 last:border-0 last:pb-0">
+                  <div class="flex justify-between mb-1">
+                    <a href="/projects/{{ project.id }}" class="font-medium text-primary hover:underline">{{ project.title }}</a>
+                    <span class="text-sm text-gray-600">{{ project.created_at.strftime('%d %b %Y') }}</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <div>
+                      <span class="text-gray-700">Status:</span>
+                      <span class="ml-1 {% if project.status == 'approved' %}text-green-600{% elif project.status == 'pending' %}text-yellow-600{% else %}text-red-600{% endif %} font-medium">
+                        {{ project.status|capitalize }}
+                      </span>
+                    </div>
+                    <div>
+                      <span class="text-gray-700">Raised:</span>
+                      <span class="ml-1 font-bold {% if project_is_funded(project) %}text-green-600{% else %}text-primary{% endif %}">
+                        ₹{{ "%.2f"|format(project.current_amount) }} / ₹{{ "%.2f"|format(project.goal) }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="mt-2">
+                    <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                      {% set progress_color = "bg-green-500" if project_is_funded(project) else "bg-primary" %}
+                      <div class="h-full rounded-full {{ progress_color }}" data-progress="{{ project_progress_percentage(project) }}"></div>
+                    </div>
+                  </div>
+                </div>
+                {% set counter.value = counter.value + 1 %}
+                {% endif %}
+              {% endfor %}
+              
+              {% if user.projects|length > 3 %}
+                <div class="text-center pt-2">
+                  <a href="/dashboard" class="text-primary hover:text-accent transition-colors duration-300 text-sm inline-flex items-center group">
+                    View All Projects
+                    <svg class="w-4 h-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  </a>
+                </div>
+              {% endif %}
+            </div>
+          {% elif user.user_type == 'admin' %}
+            <div class="flex justify-center py-4">
+              <a href="/admin" class="inline-flex items-center text-white bg-gradient-to-r from-purple-600 to-indigo-600 py-3 px-6 rounded-lg font-medium transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Go to Admin Dashboard
+              </a>
+            </div>
+          {% else %}
+            <div class="py-8 text-center text-gray-500">
+              <p>No recent activity to display.</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-gray-800 text-white py-8 mt-auto">
+    <div class="container mx-auto px-4">
+      <div class="flex flex-col md:flex-row justify-between">
+        <div class="mb-6 md:mb-0">
+          <a href="/" class="flex items-center">
+            <svg class="w-6 h-6 text-secondary" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M11 2.05V13h2V2.05c5.053.501 9 4.765 9 9.95 0 5.523-4.477 10-10 10S2 17.523 2 12c0-5.185 3.947-9.449 9-9.95z"/>
+            </svg>
+            <span class="ml-2 text-xl font-bold text-white">SparkVest</span>
+          </a>
+          <p class="mt-2 text-gray-400 max-w-xs">Bringing innovative ideas to life through community-powered funding.</p>
+        </div>
+        
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-8">
+          <div>
+            <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
+            <ul class="space-y-2">
+              <li><a href="/" class="text-gray-400 hover:text-white transition-colors">Home</a></li>
+              <li><a href="/dashboard" class="text-gray-400 hover:text-white transition-colors">Dashboard</a></li>
+              <li><a href="/profile" class="text-gray-400 hover:text-white transition-colors">My Profile</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h3 class="text-lg font-semibold mb-4">Resources</h3>
+            <ul class="space-y-2">
+              <li><a href="/help" class="text-gray-400 hover:text-white transition-colors">Help Center</a></li>
+              <li><a href="/terms" class="text-gray-400 hover:text-white transition-colors">Terms of Service</a></li>
+              <li><a href="/privacy" class="text-gray-400 hover:text-white transition-colors">Privacy Policy</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h3 class="text-lg font-semibold mb-4">Connect</h3>
+            <div class="flex space-x-4">
+              <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
+                </svg>
+              </a>
+              <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                </svg>
+              </a>
+              <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M4.98 3.5c0 1.381-1.11 2.5-2.48 2.5s-2.48-1.119-2.48-2.5c0-1.38 1.11-2.5 2.48-2.5s2.48 1.12 2.48 2.5zm.02 4.5h-5v16h5v-16zm7.982 0h-4.968v16h4.969v-8.399c0-4.67 6.029-5.052 6.029 0v8.399h4.988v-10.131c0-7.88-8.922-7.593-11.018-3.714v-2.155z"/>
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="border-t border-gray-700 mt-8 pt-6 text-center">
+        <p class="text-gray-400">&copy; 2025 SparkVest. All rights reserved.</p>
+        {% if user.user_type == 'admin' %}
+        <a href="/admin" class="inline-block mt-2 text-gray-400 hover:text-white transition-colors">Admin Panel</a>
+        {% endif %}
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Mobile menu toggle with animation
+    const menuBtn = document.getElementById('menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    
+    menuBtn.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+      if (!mobileMenu.classList.contains('hidden')) {
+        mobileMenu.classList.add('animate-slide-up');
+      }
+    });
+    
+    // Animate progress bars on load
+    document.addEventListener('DOMContentLoaded', function() {
+      const progressBars = document.querySelectorAll('.bg-primary, .bg-green-500');
+      progressBars.forEach(bar => {
+        const progress = bar.getAttribute('data-progress');
+        bar.style.width = '0';
+        setTimeout(() => {
+          bar.style.width = progress + '%';
+          bar.style.transition = 'width 1s ease-in-out';
+        }, 300);
+      });
+    });
+  </script>
+</body>
+</html> 

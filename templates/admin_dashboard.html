@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard — SparkVest</title>
+  <!-- Tailwind config with modern fintech theme -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#3D5BA9', // Modern blue
+            secondary: '#35D0BA', // Teal accent
+            dark: '#1A2A43',     // Dark blue
+            light: '#F5F9FF',    // Light background
+            accent: '#FF7E5F'    // Orange accent
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Tailwind v4 Play CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4" crossorigin="anonymous"></script>
+  <!-- Inter font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="bg-light min-h-screen font-sans flex flex-col">
+
+  <!-- Navigation -->
+  <nav class="bg-white shadow-md sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <a href="/" class="flex items-center">
+        <svg class="w-8 h-8 text-primary" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M11 2.05V13h2V2.05c5.053.501 9 4.765 9 9.95 0 5.523-4.477 10-10 10S2 17.523 2 12c0-5.185 3.947-9.449 9-9.95z"/>
+        </svg>
+        <span class="ml-2 text-2xl font-bold bg-gradient-to-r from-primary to-secondary inline-block text-transparent bg-clip-text">SparkVest</span>
+      </a>
+
+      <div class="hidden md:flex items-center space-x-8">
+        <a href="/admin" class="text-dark hover:text-primary transition-colors">Dashboard</a>
+        <a href="/admin/projects" class="text-dark hover:text-primary transition-colors">Projects</a>
+        <a href="/admin/users" class="text-dark hover:text-primary transition-colors">Users</a>
+        <div class="relative group">
+          <button class="flex items-center text-dark hover:text-primary transition-colors">
+            <span>{{ user.username }}</span>
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <div class="absolute right-0 w-48 mt-2 bg-white rounded-lg shadow-lg py-2 z-10 hidden group-hover:block">
+            <a href="/logout" class="block px-4 py-2 text-dark hover:bg-light hover:text-primary">Logout</a>
+          </div>
+        </div>
+      </div>
+
+      <button id="menu-btn" class="md:hidden text-2xl focus:outline-none">
+        ☰
+      </button>
+    </div>
+    <div id="mobile-menu" class="hidden md:hidden bg-white p-4 shadow-lg">
+      <div class="flex flex-col space-y-3">
+        <a href="/admin" class="text-dark hover:text-primary transition-colors py-2">Dashboard</a>
+        <a href="/admin/projects" class="text-dark hover:text-primary transition-colors py-2">Projects</a>
+        <a href="/admin/users" class="text-dark hover:text-primary transition-colors py-2">Users</a>
+        <a href="/logout" class="text-dark hover:text-primary transition-colors py-2">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Dashboard Header -->
+  <header class="bg-white shadow-sm">
+    <div class="container mx-auto px-4 py-8">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 class="text-2xl md:text-3xl font-bold text-dark">Admin Dashboard</h1>
+          <p class="text-gray-600 mt-1">Welcome back, {{ user.username }}</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Dashboard Content -->
+  <main class="container mx-auto px-4 py-8">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="{% if category == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %} p-4 rounded-lg mb-6">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div class="bg-white rounded-xl shadow-sm p-6">
+        <div class="flex items-center justify-between">
+          <h3 class="font-medium text-gray-500">Total Users</h3>
+          <span class="bg-blue-100 text-primary text-sm px-3 py-1 rounded-full">{{ stats.total_users }}</span>
+        </div>
+        <p class="text-3xl font-bold mt-2">{{ stats.total_users }}</p>
+      </div>
+      
+      <div class="bg-white rounded-xl shadow-sm p-6">
+        <div class="flex items-center justify-between">
+          <h3 class="font-medium text-gray-500">Pending Projects</h3>
+          <span class="bg-yellow-100 text-yellow-700 text-sm px-3 py-1 rounded-full">{{ stats.pending_projects }}</span>
+        </div>
+        <p class="text-3xl font-bold mt-2">{{ stats.pending_projects }}</p>
+      </div>
+      
+      <div class="bg-white rounded-xl shadow-sm p-6">
+        <div class="flex items-center justify-between">
+          <h3 class="font-medium text-gray-500">Active Projects</h3>
+          <span class="bg-green-100 text-green-700 text-sm px-3 py-1 rounded-full">{{ stats.approved_projects }}</span>
+        </div>
+        <p class="text-3xl font-bold mt-2">{{ stats.approved_projects }}</p>
+      </div>
+      
+      <div class="bg-white rounded-xl shadow-sm p-6">
+        <div class="flex items-center justify-between">
+          <h3 class="font-medium text-gray-500">Total Invested</h3>
+          <span class="bg-secondary bg-opacity-20 text-secondary text-sm px-3 py-1 rounded-full">{{ stats.total_investments }}</span>
+        </div>
+        <p class="text-3xl font-bold mt-2">₹{{ "%.2f"|format(stats.total_amount) }}</p>
+      </div>
+    </div>
+
+    <!-- Pending Review Projects Section -->
+    <section class="mb-12">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-dark">Projects Pending Review</h2>
+        <div class="mt-4">
+          <a href="/admin/projects?status=pending" class="inline-flex items-center bg-black text-white font-medium px-4 py-2 rounded shadow-md hover:bg-gray-800 transition">
+            View All Projects
+          </a>
+        </div>
+      </div>
+
+      {% if pending_projects %}
+      <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gray-50 text-gray-700">
+              <tr>
+                <th class="py-4 px-6 text-left font-medium">Project</th>
+                <th class="py-4 px-6 text-left font-medium">Idea Owner</th>
+                <th class="py-4 px-6 text-left font-medium">Category</th>
+                <th class="py-4 px-6 text-left font-medium">Submitted</th>
+                <th class="py-4 px-6 text-left font-medium">Goal</th>
+                <th class="py-4 px-6 text-left font-medium">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              {% for project in pending_projects %}
+              <tr class="hover:bg-gray-50">
+                <td class="py-4 px-6">
+                  <a href="/admin/projects/{{ project.id }}" class="font-medium text-primary hover:underline">{{ project.title }}</a>
+                </td>
+                <td class="py-4 px-6">{{ project.creator.username }}</td>
+                <td class="py-4 px-6">{{ project.category }}</td>
+                <td class="py-4 px-6">{{ project.created_at.strftime('%b %d, %Y') }}</td>
+                <td class="py-4 px-6">₹{{ "%.2f"|format(project.goal) }}</td>
+                <td class="py-4 px-6">
+                  <div class="flex space-x-2">
+                    <a href="/admin/projects/{{ project.id }}" class="text-primary hover:underline">Review</a>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% else %}
+      <div class="bg-white rounded-xl shadow-sm p-8 text-center">
+        <p class="text-gray-600">No projects pending review at the moment.</p>
+      </div>
+      {% endif %}
+    </section>
+
+    <!-- Recent Users Section -->
+    <section class="mb-12">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-dark">Recent Users</h2>
+        <div class="mt-4">
+          <a href="/admin/users" class="inline-flex items-center bg-black text-white font-medium px-4 py-2 rounded shadow-md hover:bg-gray-800 transition">
+            View All Users
+          </a>
+        </div>
+      </div>
+
+      {% if recent_users %}
+      <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gray-50 text-gray-700">
+              <tr>
+                <th class="py-4 px-6 text-left font-medium">Username</th>
+                <th class="py-4 px-6 text-left font-medium">Email</th>
+                <th class="py-4 px-6 text-left font-medium">User Type</th>
+                <th class="py-4 px-6 text-left font-medium">Joined</th>
+                <th class="py-4 px-6 text-left font-medium">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              {% for user in recent_users %}
+              <tr class="hover:bg-gray-50">
+                <td class="py-4 px-6">{{ user.username }}</td>
+                <td class="py-4 px-6">{{ user.email }}</td>
+                <td class="py-4 px-6">
+                  <span class="{% if user.user_type == 'admin' %}bg-primary text-white{% elif user.user_type == 'idea_owner' %}bg-accent text-white{% else %}bg-gray-100 text-gray-800{% endif %} px-2 py-1 rounded-full text-xs font-medium">
+                    {{ user.user_type }}
+                  </span>
+                </td>
+                <td class="py-4 px-6">{{ user.created_at.strftime('%b %d, %Y') }}</td>
+                <td class="py-4 px-6">
+                  <a href="/admin/users/{{ user.id }}" class="text-primary hover:underline">View</a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% else %}
+      <div class="bg-white rounded-xl shadow-sm p-8 text-center">
+        <p class="text-gray-600">No users to display.</p>
+      </div>
+      {% endif %}
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-gray-800 text-white py-6 mt-auto">
+    <div class="container mx-auto px-4">
+      <div class="text-center">
+        <p class="text-gray-400">&copy; 2025 SparkVest Admin Panel. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Mobile menu toggle
+    const menuBtn = document.getElementById('menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    
+    menuBtn.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+  </script>
+</body>
+</html> 

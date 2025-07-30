@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Investor Dashboard — SparkVest</title>
+  <!-- Tailwind config with modern fintech theme -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#3D5BA9', // Modern blue
+            secondary: '#35D0BA', // Teal accent
+            dark: '#1A2A43',     // Dark blue
+            light: '#F5F9FF',    // Light background
+            accent: '#FF7E5F'    // Orange accent
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Tailwind v4 Play CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4" crossorigin="anonymous"></script>
+  <!-- Inter font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="bg-light min-h-screen font-sans flex flex-col">
+
+  <!-- Navigation -->
+  <nav class="bg-white shadow-md sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <a href="/" class="flex items-center">
+        <svg class="w-8 h-8 text-primary" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M11 2.05V13h2V2.05c5.053.501 9 4.765 9 9.95 0 5.523-4.477 10-10 10S2 17.523 2 12c0-5.185 3.947-9.449 9-9.95z"/>
+        </svg>
+        <span class="ml-2 text-2xl font-bold bg-gradient-to-r from-primary to-secondary inline-block text-transparent bg-clip-text">SparkVest</span>
+      </a>
+
+      <div class="hidden md:flex items-center space-x-8">
+        <a href="/" class="text-dark hover:text-primary transition-colors">Home</a>
+        <a href="/browse-ideas" class="text-dark hover:text-primary transition-colors">Browse Ideas</a>
+        <div class="relative group">
+          <button class="flex items-center text-dark hover:text-primary transition-colors">
+            <span>{{ user.username }}</span>
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <div class="absolute right-0 w-48 mt-2 bg-white rounded-lg shadow-lg py-2 z-10 hidden group-hover:block">
+            <a href="/profile" class="block px-4 py-2 text-dark hover:bg-light hover:text-primary">My Profile</a>
+            <a href="/dashboard" class="block px-4 py-2 text-dark hover:bg-light hover:text-primary">Dashboard</a>
+            <a href="/logout" class="block px-4 py-2 text-dark hover:bg-light hover:text-primary">Logout</a>
+          </div>
+        </div>
+      </div>
+
+      <button id="menu-btn" class="md:hidden text-2xl focus:outline-none">
+        ☰
+      </button>
+    </div>
+    <div id="mobile-menu" class="hidden md:hidden bg-white p-4 shadow-lg">
+      <div class="flex flex-col space-y-3">
+        <a href="/" class="text-dark hover:text-primary transition-colors py-2">Home</a>
+        <a href="/browse-ideas" class="text-dark hover:text-primary transition-colors py-2">Browse Ideas</a>
+        <a href="/dashboard" class="text-dark hover:text-primary transition-colors py-2">Dashboard</a>
+        <a href="/profile" class="text-dark hover:text-primary transition-colors py-2">My Profile</a>
+        <a href="/logout" class="text-dark hover:text-primary transition-colors py-2">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Dashboard Header -->
+  <header class="bg-white shadow-sm">
+    <div class="container mx-auto px-4 py-8">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 class="text-2xl md:text-3xl font-bold text-dark">Investor Dashboard</h1>
+          <p class="text-gray-600 mt-1">Welcome back, {{ user.username }}</p>
+        </div>
+        <div class="mt-4 md:mt-0">
+          <a href="/browse-ideas" class="inline-flex items-center bg-primary text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            Browse Ideas
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Dashboard Content -->
+  <main class="container mx-auto px-4 py-8">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="{% if category == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %} p-4 rounded-lg mb-6">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div class="bg-white rounded-xl shadow-sm p-6">
+        <div class="flex items-center justify-between">
+          <h3 class="font-medium text-gray-500">Total Invested</h3>
+          <span class="bg-blue-100 text-primary text-sm px-3 py-1 rounded-full">{{ investments|length }}</span>
+        </div>
+        <p class="text-3xl font-bold mt-2">₹{{ "%.2f"|format(investments|sum(attribute='amount')) }}</p>
+        <div class="mt-4">
+          <a href="#your-investments" class="text-primary hover:underline flex items-center text-sm">
+            View All
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </a>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-xl shadow-sm p-6">
+        <div class="flex items-center justify-between">
+          <h3 class="font-medium text-gray-500">Ideas Backed</h3>
+          <span class="bg-green-100 text-green-700 text-sm px-3 py-1 rounded-full">Active</span>
+        </div>
+        <p class="text-3xl font-bold mt-2">
+          {{ investments|map(attribute='project_id')|unique|list|length }}
+        </p>
+        <div class="mt-4">
+          <a href="#backed-ideas" class="text-primary hover:underline flex items-center text-sm">
+            View Details
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </a>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-xl shadow-sm p-6">
+        <div class="flex items-center justify-between">
+          <h3 class="font-medium text-gray-500">Success Rate</h3>
+          {% set funded_projects = investments|map(attribute='project')|selectattr('is_funded', 'eq', true)|unique|list %}
+          {% set invested_projects = investments|map(attribute='project')|unique|list %}
+          {% set success_rate = (funded_projects|length / invested_projects|length * 100)|round if invested_projects|length > 0 else 0 %}
+          <span class="bg-secondary bg-opacity-20 text-secondary text-sm px-3 py-1 rounded-full">{{ success_rate }}%</span>
+        </div>
+        <p class="text-3xl font-bold mt-2">{{ funded_projects|length }} Funded</p>
+        <div class="mt-4">
+          <div class="w-full bg-gray-200 rounded-full h-2.5">
+            <div class="bg-secondary h-2.5 rounded-full progress-bar" data-progress="{{ success_rate }}"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Featured Ideas Section -->
+    <section class="mb-12">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-dark">Featured Ideas</h2>
+        <a href="/browse-ideas" class="text-primary hover:underline flex items-center">
+          View All
+          <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </div>
+
+      {% if featured_projects %}
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for project in featured_projects %}
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+          <div class="h-40 bg-gray-200 relative">
+            {% if project.image_url %}
+            <img src="{{ project.image_url }}" alt="{{ project.title }}" class="w-full h-full object-cover">
+            {% else %}
+            <div class="flex items-center justify-center h-full bg-gradient-to-r from-primary to-secondary text-white">
+              <span class="text-2xl font-bold">{{ project.title[:1] }}</span>
+            </div>
+            {% endif %}
+            <div class="absolute top-4 right-4 {% if project.days_remaining > 0 %}bg-accent{% else %}bg-gray-500{% endif %} text-white px-3 py-1 rounded-full text-sm font-medium">
+              {% if project.days_remaining > 0 %}
+              {{ project.days_remaining }} days left
+              {% else %}
+              Ended
+              {% endif %}
+            </div>
+          </div>
+          <div class="p-6">
+            <h3 class="text-xl font-semibold mb-2">{{ project.title }}</h3>
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <span class="text-gray-600">Goal: ₹{{ "%.2f"|format(project.goal) }}</span>
+              </div>
+              <div>
+                <span class="{% if project.is_funded %}text-green-600{% else %}text-accent{% endif %} font-medium">
+                  ₹{{ "%.2f"|format(project.current_amount) }}
+                </span>
+              </div>
+            </div>
+            <div class="mb-4">
+              <div class="w-full bg-gray-200 rounded-full h-2">
+                <div class="h-full {% if project.is_funded %}bg-green-500{% else %}bg-secondary{% endif %} rounded-full progress-bar" data-progress="{{ project.progress_percentage }}"></div>
+              </div>
+              <div class="flex justify-between mt-2 text-sm font-medium">
+                <span>{{ project.progress_percentage }}%</span>
+                {% if project.is_funded %}
+                <span class="text-green-600">Funded!</span>
+                {% endif %}
+              </div>
+            </div>
+            <div class="flex space-x-2">
+              <a href="/projects/{{ project.id }}" class="flex-1 bg-black text-white text-center py-2 rounded hover:bg-opacity-90 transition-colors">
+                View Details
+              </a>
+              <a href="/projects/{{ project.id }}/invest" class="flex-1 border border-black text-black text-center py-2 rounded hover:bg-black hover:text-white transition-colors">
+                Invest
+              </a>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="bg-white rounded-xl shadow-sm p-8 text-center">
+        <p class="text-gray-600">No featured ideas available at the moment. Check back later.</p>
+      </div>
+      {% endif %}
+    </section>
+
+    <!-- Your Investments Section -->
+    <section id="your-investments" class="mb-12">
+      <h2 class="text-2xl font-bold text-dark mb-6">Your Investments</h2>
+
+      {% if investments %}
+      <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gray-50 text-gray-700">
+              <tr>
+                <th class="py-4 px-6 text-left font-medium">Idea</th>
+                <th class="py-4 px-6 text-left font-medium">Amount</th>
+                <th class="py-4 px-6 text-left font-medium">Date</th>
+                <th class="py-4 px-6 text-left font-medium">Status</th>
+                <th class="py-4 px-6 text-left font-medium">Progress</th>
+                <th class="py-4 px-6 text-left font-medium">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              {% for investment in investments %}
+              <tr class="hover:bg-gray-50">
+                <td class="py-4 px-6">
+                  <a href="/projects/{{ investment.project_id }}" class="font-medium text-primary hover:underline">{{ investment.project.title }}</a>
+                </td>
+                <td class="py-4 px-6">₹{{ "%.2f"|format(investment.amount) }}</td>
+                <td class="py-4 px-6">{{ investment.created_at.strftime('%b %d, %Y') }}</td>
+                <td class="py-4 px-6">
+                  {% if investment.project.is_funded %}
+                  <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">Funded</span>
+                  {% elif investment.project.days_remaining <= 0 %}
+                  <span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-medium">Ended</span>
+                  {% else %}
+                  <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">Active</span>
+                  {% endif %}
+                </td>
+                <td class="py-4 px-6">
+                  <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="h-full {% if investment.project.is_funded %}bg-green-500{% else %}bg-secondary{% endif %} rounded-full progress-bar" data-progress="{{ investment.project.progress_percentage }}"></div>
+                  </div>
+                  <span class="text-sm text-gray-600">{{ investment.project.progress_percentage }}%</span>
+                </td>
+                <td class="py-4 px-6">
+                  <a href="/projects/{{ investment.project_id }}" class="text-primary hover:underline">View</a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% else %}
+      <div class="bg-white rounded-xl shadow-sm p-8 text-center">
+        <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h3 class="text-xl font-semibold mb-2">No investments yet</h3>
+        <p class="text-gray-600 mb-6">Start investing in innovative ideas to see your portfolio grow.</p>
+        <a href="/browse-ideas" class="inline-flex items-center bg-primary text-white px-6 py-3 rounded-lg hover:bg-opacity-90 transition-colors">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          Browse Ideas to Invest
+        </a>
+      </div>
+      {% endif %}
+    </section>
+
+    <!-- Trending Ideas Section -->
+    <section id="trending-ideas" class="mb-12">
+      <h2 class="text-2xl font-bold text-dark mb-6">Trending Ideas</h2>
+
+      {% if trending_projects %}
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {% for project in trending_projects %}
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+          <div class="h-32 bg-gray-200 relative">
+            {% if project.image_url %}
+            <img src="{{ project.image_url }}" alt="{{ project.title }}" class="w-full h-full object-cover">
+            {% else %}
+            <div class="flex items-center justify-center h-full bg-gradient-to-r from-primary to-secondary text-white">
+              <span class="text-xl font-bold">{{ project.title[:1] }}</span>
+            </div>
+            {% endif %}
+          </div>
+          <div class="p-4">
+            <h3 class="text-lg font-semibold mb-2 truncate">{{ project.title }}</h3>
+            <div class="flex justify-between text-sm mb-2">
+              <span class="text-gray-600">₹{{ "%.2f"|format(project.current_amount) }} raised</span>
+              <span>{{ project.progress_percentage }}%</span>
+            </div>
+            <div class="h-1.5 bg-gray-200 rounded-full mb-3">
+              <div class="h-full {% if project.is_funded %}bg-green-500{% else %}bg-secondary{% endif %} rounded-full progress-bar" data-progress="{{ project.progress_percentage }}"></div>
+            </div>
+            <a href="/projects/{{ project.id }}" class="block text-center text-primary text-sm hover:underline">View Details</a>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="bg-white rounded-xl shadow-sm p-6 text-center">
+        <p class="text-gray-600">No trending ideas available at the moment.</p>
+      </div>
+      {% endif %}
+    </section>
+
+    <div class="flex justify-end mt-8">
+      <a href="/browse-ideas" class="bg-black text-white font-medium px-6 py-2 rounded-lg hover:bg-gray-800 transition shadow-md inline-flex items-center">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+        </svg>
+        Browse More Ideas
+      </a>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-gray-800 text-white py-8 mt-auto">
+    <div class="container mx-auto px-4">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div>
+          <a href="/" class="flex items-center">
+            <svg class="w-6 h-6 text-secondary" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M11 2.05V13h2V2.05c5.053.501 9 4.765 9 9.95 0 5.523-4.477 10-10 10S2 17.523 2 12c0-5.185 3.947-9.449 9-9.95z"/>
+            </svg>
+            <span class="ml-2 text-xl font-bold text-white">SparkVest</span>
+          </a>
+          <p class="mt-4 text-gray-400">Bringing innovative ideas to life through community-powered funding.</p>
+        </div>
+        
+        <div>
+          <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
+          <ul class="space-y-2">
+            <li><a href="/" class="text-gray-400 hover:text-white transition-colors">Home</a></li>
+            <li><a href="/browse-ideas" class="text-gray-400 hover:text-white transition-colors">Browse Ideas</a></li>
+            <li><a href="/dashboard" class="text-gray-400 hover:text-white transition-colors">Dashboard</a></li>
+            <li><a href="/how-it-works" class="text-gray-400 hover:text-white transition-colors">How It Works</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h3 class="text-lg font-semibold mb-4">Resources</h3>
+          <ul class="space-y-2">
+            <li><a href="/help" class="text-gray-400 hover:text-white transition-colors">Help Center</a></li>
+            <li><a href="/terms" class="text-gray-400 hover:text-white transition-colors">Terms of Service</a></li>
+            <li><a href="/privacy" class="text-gray-400 hover:text-white transition-colors">Privacy Policy</a></li>
+            <li><a href="/contact" class="text-gray-400 hover:text-white transition-colors">Contact Us</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h3 class="text-lg font-semibold mb-4">Stay Connected</h3>
+          <div class="flex space-x-4 mb-4">
+            <a href="#" class="text-gray-400 hover:text-white transition-colors">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
+              </svg>
+            </a>
+            <a href="#" class="text-gray-400 hover:text-white transition-colors">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+              </svg>
+            </a>
+            <a href="#" class="text-gray-400 hover:text-white transition-colors">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/>
+              </svg>
+            </a>
+            <a href="#" class="text-gray-400 hover:text-white transition-colors">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M4.98 3.5c0 1.381-1.11 2.5-2.48 2.5s-2.48-1.119-2.48-2.5c0-1.38 1.11-2.5 2.48-2.5s2.48 1.12 2.48 2.5zm.02 4.5h-5v16h5v-16zm7.982 0h-4.968v16h4.969v-8.399c0-4.67 6.029-5.052 6.029 0v8.399h4.988v-10.131c0-7.88-8.922-7.593-11.018-3.714v-2.155z"/>
+              </svg>
+            </a>
+          </div>
+          <p class="text-gray-400">Sign up for our newsletter</p>
+          <div class="mt-2 flex">
+            <input type="email" placeholder="Email address" class="bg-gray-700 text-white px-4 py-2 rounded-l focus:outline-none focus:ring-1 focus:ring-secondary">
+            <button class="bg-secondary text-white px-4 py-2 rounded-r hover:bg-opacity-90 transition-colors">Subscribe</button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="border-t border-gray-700 mt-8 pt-8 text-center">
+        <p class="text-gray-400">&copy; 2025 SparkVest. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Mobile menu toggle
+    const menuBtn = document.getElementById('menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    
+    menuBtn.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+    
+    // Initialize progress bars
+    document.addEventListener('DOMContentLoaded', () => {
+      const progressBars = document.querySelectorAll('.progress-bar');
+      progressBars.forEach(bar => {
+        const progress = bar.getAttribute('data-progress') || '0';
+        bar.style.width = `${progress}%`;
+      });
+    });
+  </script>
+</body>
+</html> 

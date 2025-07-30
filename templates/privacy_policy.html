@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - SparkVest</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwindcss.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3D5BA9',
+                        secondary: '#35D0BA',
+                        dark: '#1A2A43',
+                        light: '#F5F9FF',
+                        accent: '#FF7E5F'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .content-section h2 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #1A2A43;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #3D5BA9;
+            padding-bottom: 0.5rem;
+        }
+        .content-section h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1A2A43;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+        .content-section p, .content-section ul {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+            color: #374151; /* text-gray-700 */
+        }
+        .content-section ul {
+            list-style-type: disc;
+            margin-left: 1.5rem;
+        }
+        .content-section a {
+            color: #3D5BA9; /* primary */
+            text-decoration: underline;
+        }
+        .content-section a:hover {
+            color: #35D0BA; /* secondary */
+        }
+    </style>
+</head>
+<body class="font-sans bg-gray-50 text-gray-800">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md py-4">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <a href="/" class="text-2xl font-bold text-primary flex items-center">
+                <span class="text-accent">✦</span>
+                <span class="ml-2">SparkVest</span>
+            </a>
+            <div class="hidden md:flex space-x-6">
+                <a href="/" class="text-gray-700 hover:text-primary">Home</a>
+                <a href="/explore" class="text-gray-700 hover:text-primary">Explore</a>
+                <a href="/how-it-works" class="text-gray-700 hover:text-primary">How It Works</a>
+                <a href="/about" class="text-gray-700 hover:text-primary">About</a>
+                <!-- Add other links like FAQ, Contact if they exist -->
+            </div>
+            <div class="flex space-x-4">
+                <a href="/login" class="text-gray-700 hover:text-primary font-medium">Log In</a>
+                <a href="/register" class="bg-black text-white px-4 py-2 rounded hover:bg-primary/80 transition shadow-md">Sign Up</a>
+            </div>
+             <button id="menu-btn" class="md:hidden text-2xl focus:outline-none focus:ring-2 focus:ring-primary rounded p-1 transition-colors hover:bg-light">
+                ☰
+            </button>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="md:hidden hidden bg-white py-2 px-4">
+            <a href="/" class="block py-2 text-gray-700 hover:text-primary">Home</a>
+            <a href="/explore" class="block py-2 text-gray-700 hover:text-primary">Explore</a>
+            <a href="/how-it-works" class="block py-2 text-gray-700 hover:text-primary">How It Works</a>
+            <a href="/about" class="block py-2 text-gray-700 hover:text-primary">About</a>
+            <div class="mt-4 flex flex-col space-y-2">
+                <a href="/login" class="block py-2 text-gray-700 hover:text-primary">Log In</a>
+                <a href="/register" class="block bg-primary text-white px-4 py-2 rounded hover:bg-blue-600 transition text-center">Sign Up</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-12 content-section">
+        <h1 class="text-4xl font-bold text-dark mb-8 text-center">Privacy Policy</h1>
+
+        <p class="text-sm text-gray-600 mb-6">Last Updated: <span id="lastUpdatedDate"></span></p>
+
+        <p>Welcome to SparkVest! Your privacy is critically important to us. This Privacy Policy document outlines the types of personal information that is received and collected by SparkVest and how it is used.</p>
+
+        <h2>1. Information We Collect</h2>
+        <p>We collect information to provide better services to all our users. The types of information we collect include:</p>
+        <h3>1.1. Information You Provide to Us</h3>
+        <ul>
+            <li><strong>Account Information:</strong> When you register for an account on SparkVest, we collect personal information such as your name, email address, password, and profile picture.</li>
+            <li><strong>Project Information:</strong> If you create a project (as a Creator), we collect information about your project, including its description, funding goals, rewards, images, and videos.</li>
+            <li><strong>Pledge Information:</strong> If you back a project (as a Backer), we collect information related to your pledge, including the pledge amount and selected reward. Payment information (like credit card details) is processed by our third-party payment processors, and we do not store this information on our servers.</li>
+            <li><strong>Communications:</strong> If you contact us directly, we may receive additional information about you such as your name, email address, phone number, the contents of the message and/or attachments you may send us, and any other information you may choose to provide.</li>
+        </ul>
+        <h3>1.2. Information We Collect Automatically</h3>
+        <ul>
+            <li><strong>Log Data:</strong> When you use SparkVest, our servers automatically record information that your browser sends. This log data may include your IP address, browser type, browser version, the pages of our service that you visit, the time and date of your visit, the time spent on those pages, and other statistics.</li>
+            <li><strong>Cookies and Similar Technologies:</strong> We use cookies and similar tracking technologies to track the activity on our service and hold certain information. Cookies are files with a small amount of data which may include an anonymous unique identifier. You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent.</li>
+        </ul>
+
+        <h2>2. How We Use Your Information</h2>
+        <p>We use the information we collect in various ways, including to:</p>
+        <ul>
+            <li>Provide, operate, and maintain our website and services.</li>
+            <li>Improve, personalize, and expand our website and services.</li>
+            <li>Understand and analyze how you use our website and services.</li>
+            <li>Develop new products, services, features, and functionality.</li>
+            <li>Communicate with you, either directly or through one of our partners, including for customer service, to provide you with updates and other information relating to the website, and for marketing and promotional purposes.</li>
+            <li>Process your transactions (pledges and project funding).</li>
+            <li>Send you emails, such as project updates, newsletters, and administrative messages.</li>
+            <li>Find and prevent fraud.</li>
+        </ul>
+
+        <h2>3. How We Share Your Information</h2>
+        <p>We do not sell your personal information. We may share your information in the following circumstances:</p>
+        <ul>
+            <li><strong>With Creators and Backers:</strong> When a Backer pledges to a project, we share the Backer's necessary information (like name and email, and shipping address if a physical reward is involved) with the Creator to allow them to fulfill rewards and communicate updates. Creators' project information is publicly visible.</li>
+            <li><strong>Service Providers:</strong> We may employ third-party companies and individuals to facilitate our Service ("Service Providers"), to provide the Service on our behalf, to perform Service-related services, or to assist us in analyzing how our Service is used. These third parties have access to your Personal Information only to perform these tasks on our behalf and are obligated not to disclose or use it for any other purpose (e.g., payment processors, email service providers).</li>
+            <li><strong>Legal Requirements:</strong> SparkVest may disclose your Personal Information in the good faith belief that such action is necessary to: comply with a legal obligation, protect and defend the rights or property of SparkVest, prevent or investigate possible wrongdoing in connection with the Service, protect the personal safety of users of the Service or the public, or protect against legal liability.</li>
+            <li><strong>Business Transfers:</strong> If SparkVest is involved in a merger, acquisition, or asset sale, your Personal Information may be transferred. We will provide notice before your Personal Information is transferred and becomes subject to a different Privacy Policy.</li>
+            <li><strong>With Your Consent:</strong> We may share your information with your consent or at your direction.</li>
+        </ul>
+
+        <h2>4. Data Security</h2>
+        <p>The security of your data is important to us but remember that no method of transmission over the Internet or method of electronic storage is 100% secure. While we strive to use commercially acceptable means to protect your Personal Information, we cannot guarantee its absolute security.</p>
+
+        <h2>5. Data Retention</h2>
+        <p>We will retain your Personal Information only for as long as is necessary for the purposes set out in this Privacy Policy. We will retain and use your Personal Information to the extent necessary to comply with our legal obligations (for example, if we are required to retain your data to comply with applicable laws), resolve disputes, and enforce our legal agreements and policies.</p>
+
+        <h2>6. Your Data Protection Rights</h2>
+        <p>Depending on your location, you may have the following rights regarding your personal information:</p>
+        <ul>
+            <li>The right to access – You have the right to request copies of your personal data.</li>
+            <li>The right to rectification – You have the right to request that we correct any information you believe is inaccurate or complete information you believe is incomplete.</li>
+            <li>The right to erasure – You have the right to request that we erase your personal data, under certain conditions.</li>
+            <li>The right to restrict processing – You have the right to request that we restrict the processing of your personal data, under certain conditions.</li>
+            <li>The right to object to processing – You have the right to object to our processing of your personal data, under certain conditions.</li>
+            <li>The right to data portability – You have the right to request that we transfer the data that we have collected to another organization, or directly to you, under certain conditions.</li>
+        </ul>
+        <p>If you make a request, we have one month to respond to you. If you would like to exercise any of these rights, please contact us at our contact information below.</p>
+
+        <h2>7. Children's Privacy</h2>
+        <p>Our Service does not address anyone under the age of 13 ("Children"). We do not knowingly collect personally identifiable information from children under 13. If you are a parent or guardian and you are aware that your Child has provided us with Personal Information, please contact us. If we become aware that we have collected Personal Information from a child under age 13 without verification of parental consent, we take steps to remove that information from our servers.</p>
+
+        <h2>8. Links to Other Websites</h2>
+        <p>Our Service may contain links to other websites that are not operated by us. If you click on a third-party link, you will be directed to that third party's site. We strongly advise you to review the Privacy Policy of every site you visit. We have no control over and assume no responsibility for the content, privacy policies, or practices of any third-party sites or services.</p>
+
+        <h2>9. Changes to This Privacy Policy</h2>
+        <p>We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last Updated" date at the top of this Privacy Policy. You are advised to review this Privacy Policy periodically for any changes. Changes to this Privacy Policy are effective when they are posted on this page.</p>
+
+        <h2>10. Contact Us</h2>
+        <p>If you have any questions about this Privacy Policy, please contact us:</p>
+        <ul>
+            <li>By email: <a href="mailto:sparkvestfunds@gmail.com">sparkvestfunds@gmail.com</a></li>
+            <li>By phone number: +91 6363 199 204</li>
+            <li>By visiting this page on our website: [Link to a Contact Us Page, if available, otherwise remove or adapt]</li>
+        </ul>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-gray-300 py-12 mt-16">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                <div>
+                    <h3 class="text-xl font-semibold text-white mb-4">SparkVest</h3>
+                    <p class="text-gray-400">Funding the future, one idea at a time. Join our community of innovators and backers.</p>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-white mb-4">Legal</h3>
+                    <ul class="space-y-2">
+                        <li><a href="/terms-and-conditions" class="hover:text-secondary">Terms & Conditions</a></li>
+                        <li><a href="/privacy-policy" class="text-secondary font-semibold">Privacy Policy</a></li>
+                        <li><a href="/faq" class="hover:text-secondary">FAQ</a></li> <!-- Assuming FAQ page exists -->
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-white mb-4">Connect With Us</h3>
+                    <div class="flex space-x-4">
+                         <a href="#" class="text-gray-400 hover:text-white"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M18.77 7.46H14.5v-1.9c0-.9.6-1.1 1-1.1h3V.5h-4.33C10.24.5 9.5 3.36 9.5 5.32v2.14H6.1v3.56h3.4v8.94h3.98v-8.94h3.62l.27-3.56z"/></svg></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723 10.016 10.016 0 01-3.127 1.195 4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.16a4.894 4.894 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.937 4.937 0 004.604 3.417 9.868 9.868 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.054 0 13.999-7.496 13.999-13.986 0-.209 0-.42-.015-.63a9.936 9.936 0 002.46-2.548l-.047-.02z"/></svg></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg></a>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8 pt-8 border-t border-gray-700 text-center text-gray-400">
+                <p>&copy; <span id="currentYear"></span> SparkVest. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        const menuBtn = document.getElementById('menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        menuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Set current year in footer and last updated date
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+        const today = new Date();
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('lastUpdatedDate').textContent = today.toLocaleDateString('en-US', options);
+    </script>
+</body>
+</html>

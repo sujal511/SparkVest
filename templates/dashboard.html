@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — SparkVest</title>
+  <!-- Tailwind config with modern fintech theme -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#3D5BA9', // Modern blue
+            secondary: '#35D0BA', // Teal accent
+            dark: '#1A2A43',     // Dark blue
+            light: '#F5F9FF',    // Light background
+            accent: '#FF7E5F'    // Orange accent
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Tailwind v4 Play CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4" crossorigin="anonymous"></script>
+  <!-- Inter font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="bg-light min-h-screen font-sans flex flex-col">
+
+  <!-- Navigation -->
+  <nav class="bg-white shadow-md sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <a href="/" class="flex items-center">
+        <svg class="w-8 h-8 text-primary" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M11 2.05V13h2V2.05c5.053.501 9 4.765 9 9.95 0 5.523-4.477 10-10 10S2 17.523 2 12c0-5.185 3.947-9.449 9-9.95z"/>
+        </svg>
+        <span class="ml-2 text-2xl font-bold bg-gradient-to-r from-primary to-secondary inline-block text-transparent bg-clip-text">SparkVest</span>
+      </a>
+
+      <div class="hidden md:flex items-center space-x-8">
+        <a href="/" class="text-dark hover:text-primary transition-colors">Home</a>
+        <a href="/projects/discover" class="text-dark hover:text-primary transition-colors">Discover</a>
+        <div class="relative group">
+          <button class="flex items-center text-dark hover:text-primary transition-colors">
+            <span>{{ user.name }}</span>
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <div class="absolute right-0 w-48 mt-2 bg-white rounded-lg shadow-lg py-2 z-10 hidden group-hover:block">
+            <a href="/dashboard" class="block px-4 py-2 text-dark hover:bg-light hover:text-primary">Dashboard</a>
+            <a href="/logout" class="block px-4 py-2 text-dark hover:bg-light hover:text-primary">Logout</a>
+          </div>
+        </div>
+      </div>
+
+      <button id="menu-btn" class="md:hidden text-2xl focus:outline-none">
+        ☰
+      </button>
+    </div>
+    <div id="mobile-menu" class="hidden md:hidden bg-white p-4 shadow-lg">
+      <div class="flex flex-col space-y-3">
+        <a href="/" class="text-dark hover:text-primary transition-colors py-2">Home</a>
+        <a href="/projects/discover" class="text-dark hover:text-primary transition-colors py-2">Discover</a>
+        <a href="/dashboard" class="text-dark hover:text-primary transition-colors py-2">Dashboard</a>
+        <a href="/logout" class="text-dark hover:text-primary transition-colors py-2">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Dashboard Header -->
+  <header class="bg-white shadow-sm">
+    <div class="container mx-auto px-4 py-8">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 class="text-2xl md:text-3xl font-bold text-dark">Dashboard</h1>
+          <p class="text-gray-600 mt-1">Welcome back, {{ user.name }}</p>
+        </div>
+        <div class="mt-4 md:mt-0">
+          <div class="mt-4">
+            <a href="/submit-idea" class="bg-primary text-white font-medium px-4 py-2 rounded shadow-md hover:bg-primary/90 transition inline-flex items-center">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+              </svg>
+              Create New Project
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Dashboard Content -->
+  <main class="container mx-auto px-4 py-8">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="{% if category == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %} p-4 rounded-lg mb-6">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div class="bg-white rounded-xl shadow-sm p-6">
+        <div class="flex items-center justify-between">
+          <h3 class="font-medium text-gray-500">Your Projects</h3>
+          <span class="bg-blue-100 text-primary text-sm px-3 py-1 rounded-full">{{ projects|length }}</span>
+        </div>
+        <p class="text-3xl font-bold mt-2">{{ projects|length }} Projects</p>
+        <div class="mt-4">
+          <a href="#your-projects" class="text-primary hover:underline flex items-center text-sm">
+            View All
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </a>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-xl shadow-sm p-6">
+        <div class="flex items-center justify-between">
+          <h3 class="font-medium text-gray-500">Your Investments</h3>
+          <span class="bg-green-100 text-green-700 text-sm px-3 py-1 rounded-full">{{ investments|length }}</span>
+        </div>
+        <p class="text-3xl font-bold mt-2">
+          ₹{{ "%.2f"|format(investments|sum(attribute='amount')) }}
+        </p>
+        <div class="mt-4">
+          <a href="#your-investments" class="text-primary hover:underline flex items-center text-sm">
+            View All
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </a>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-xl shadow-sm p-6">
+        <div class="flex items-center justify-between">
+          <h3 class="font-medium text-gray-500">Funding Success</h3>
+          {% set funded_projects = projects|selectattr('is_funded', 'eq', true)|list %}
+          {% set success_rate = (funded_projects|length / projects|length * 100)|round if projects|length > 0 else 0 %}
+          <span class="bg-secondary bg-opacity-20 text-secondary text-sm px-3 py-1 rounded-full">{{ success_rate }}%</span>
+        </div>
+        <p class="text-3xl font-bold mt-2">{{ funded_projects|length }} Funded</p>
+        <div class="mt-4">
+          <div class="w-full bg-gray-200 rounded-full h-2.5">
+            <div class="bg-secondary h-2.5 rounded-full progress-bar" data-progress="{{ success_rate }}"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Your Projects Section -->
+    <section id="your-projects" class="mb-12">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-dark">Your Projects</h2>
+        <a href="/projects/new" class="text-primary hover:underline flex items-center">
+          <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          New Project
+        </a>
+      </div>
+
+      {% if projects %}
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for project in projects %}
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+          <div class="h-40 bg-gray-200 relative">
+            {% if project.image_url %}
+            <img src="{{ project.image_url }}" alt="{{ project.title }}" class="w-full h-full object-cover">
+            {% else %}
+            <div class="flex items-center justify-center h-full bg-gradient-to-r from-primary to-secondary text-white">
+              <span class="text-2xl font-bold">{{ project.title[:1] }}</span>
+            </div>
+            {% endif %}
+            <div class="absolute top-4 right-4 {% if project.days_remaining > 0 %}bg-accent{% else %}bg-gray-500{% endif %} text-white px-3 py-1 rounded-full text-sm font-medium">
+              {% if project.days_remaining > 0 %}
+              {{ project.days_remaining }} days left
+              {% else %}
+              Ended
+              {% endif %}
+            </div>
+          </div>
+          <div class="p-6">
+            <h3 class="text-xl font-semibold mb-2">{{ project.title }}</h3>
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <span class="text-gray-600">Goal: ₹{{ "%.2f"|format(project.goal_amount) }}</span>
+              </div>
+              <div>
+                <span class="{% if project.is_funded %}text-green-600{% else %}text-accent{% endif %} font-medium">
+                  ₹{{ "%.2f"|format(project.current_amount) }}
+                </span>
+              </div>
+            </div>
+            <div class="mb-4">
+              <div class="h-2 bg-gray-200 rounded-full">
+                <div class="h-full {% if project.is_funded %}bg-green-500{% else %}bg-secondary{% endif %} rounded-full progress-bar" data-progress="{{ project.progress_percentage }}"></div>
+              </div>
+              <div class="flex justify-between mt-2 text-sm font-medium">
+                <span>{{ project.progress_percentage }}%</span>
+                {% if project.is_funded %}
+                <span class="text-green-600">Funded!</span>
+                {% endif %}
+              </div>
+            </div>
+            <div class="flex space-x-2">
+              <a href="/projects/{{ project.id }}" class="flex-1 bg-primary text-white text-center py-2 rounded hover:bg-opacity-90 transition-colors">
+                View
+              </a>
+              <a href="/projects/{{ project.id }}/edit" class="flex-1 border border-primary text-primary text-center py-2 rounded hover:bg-primary hover:text-white transition-colors">
+                Edit
+              </a>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="bg-white rounded-xl shadow-sm p-8 text-center">
+        <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+        </svg>
+        <h3 class="text-xl font-semibold mb-2">No projects yet</h3>
+        <p class="text-gray-600 mb-6">Start creating your first project and bring your ideas to life.</p>
+        <a href="/projects/new" class="inline-flex items-center bg-primary text-white px-6 py-3 rounded-lg hover:bg-opacity-90 transition-colors">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          Create Your First Project
+        </a>
+      </div>
+      {% endif %}
+    </section>
+
+    <!-- Your Investments Section -->
+    <section id="your-investments" class="mb-12">
+      <h2 class="text-2xl font-bold text-dark mb-6">Your Investments</h2>
+
+      {% if investments %}
+      <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <table class="w-full">
+          <thead class="bg-gray-50 text-left">
+            <tr>
+              <th class="px-6 py-4 text-sm font-medium text-gray-500">Project</th>
+              <th class="px-6 py-4 text-sm font-medium text-gray-500">Amount</th>
+              <th class="px-6 py-4 text-sm font-medium text-gray-500">Date</th>
+              <th class="px-6 py-4 text-sm font-medium text-gray-500">Status</th>
+              <th class="px-6 py-4 text-sm font-medium text-gray-500">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            {% for investment in investments %}
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4">
+                <div class="flex items-center">
+                  <div class="w-10 h-10 flex-shrink-0 mr-3 rounded overflow-hidden bg-gray-200">
+                    {% if investment.project.image_url %}
+                    <img src="{{ investment.project.image_url }}" alt="" class="w-full h-full object-cover">
+                    {% else %}
+                    <div class="flex items-center justify-center h-full bg-gradient-to-r from-primary to-secondary text-white">
+                      <span class="font-bold">{{ investment.project.title[:1] }}</span>
+                    </div>
+                    {% endif %}
+                  </div>
+                  <div>
+                    <div class="font-medium text-dark">{{ investment.project.title }}</div>
+                    <div class="text-sm text-gray-500">by {{ investment.project.creator.name }}</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 font-medium">₹{{ "%.2f"|format(investment.amount) }}</td>
+              <td class="px-6 py-4 text-gray-500">{{ investment.created_at.strftime('%b %d, %Y') }}</td>
+              <td class="px-6 py-4">
+                {% if investment.project.is_funded %}
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  Funded
+                </span>
+                {% elif investment.project.days_remaining > 0 %}
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  Active
+                </span>
+                {% else %}
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                  Expired
+                </span>
+                {% endif %}
+              </td>
+              <td class="px-6 py-4">
+                <a href="/projects/{{ investment.project.id }}" class="text-primary hover:underline">View Project</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="bg-white rounded-xl shadow-sm p-8 text-center">
+        <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h3 class="text-xl font-semibold mb-2">No investments yet</h3>
+        <p class="text-gray-600 mb-6">Discover exciting projects and start investing today.</p>
+        <div class="mt-4">
+          <a href="/explore" class="bg-primary text-white font-medium px-4 py-2 rounded shadow-md hover:bg-primary/90 transition inline-flex items-center">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            Browse Projects
+          </a>
+        </div>
+      </div>
+      {% endif %}
+    </section>
+
+    <!-- Help Section -->
+    <div class="mt-6 p-6 bg-black text-white rounded-xl shadow-md">
+        <h3 class="text-xl font-semibold mb-4">Need help?</h3>
+        <p class="mb-4">Our support team is here to assist with any questions you have.</p>
+        <a href="/support" class="inline-flex items-center text-white hover:text-light transition-colors">
+            Contact Support
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+        </a>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-dark text-white mt-auto">
+    <div class="container mx-auto px-4 py-8">
+      <div class="text-center">
+        <a href="/" class="flex items-center justify-center mb-4">
+          <svg class="w-6 h-6 text-secondary" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M11 2.05V13h2V2.05c5.053.501 9 4.765 9 9.95 0 5.523-4.477 10-10 10S2 17.523 2 12c0-5.185 3.947-9.449 9-9.95z"/>
+          </svg>
+          <span class="ml-2 text-xl font-bold">SparkVest</span>
+        </a>
+        <p class="text-sm opacity-75">&copy; 2023 SparkVest. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Mobile menu toggle
+    document.getElementById('menu-btn').addEventListener('click', function() {
+      document.getElementById('mobile-menu').classList.toggle('hidden');
+    });
+    
+    // Set progress bar widths
+    document.querySelectorAll('.progress-bar').forEach(bar => {
+      const progress = bar.getAttribute('data-progress');
+      bar.style.width = progress + '%';
+    });
+  </script>
+
+</body>
+</html> 

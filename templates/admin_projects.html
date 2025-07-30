@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Manage Projects — SparkVest Admin</title>
+  <!-- Tailwind config with modern fintech theme -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#3D5BA9', // Modern blue
+            secondary: '#35D0BA', // Teal accent
+            dark: '#1A2A43',     // Dark blue
+            light: '#F5F9FF',    // Light background
+            accent: '#FF7E5F'    // Orange accent
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Tailwind v4 Play CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4" crossorigin="anonymous"></script>
+  <!-- Inter font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="bg-light min-h-screen font-sans flex flex-col">
+
+  <!-- Navigation -->
+  <nav class="bg-white shadow-md sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <a href="/" class="flex items-center">
+        <svg class="w-8 h-8 text-primary" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M11 2.05V13h2V2.05c5.053.501 9 4.765 9 9.95 0 5.523-4.477 10-10 10S2 17.523 2 12c0-5.185 3.947-9.449 9-9.95z"/>
+        </svg>
+        <span class="ml-2 text-2xl font-bold bg-gradient-to-r from-primary to-secondary inline-block text-transparent bg-clip-text">SparkVest</span>
+      </a>
+
+      <div class="hidden md:flex items-center space-x-8">
+        <a href="/admin" class="text-dark hover:text-primary transition-colors">Dashboard</a>
+        <a href="/admin/projects" class="text-dark hover:text-primary transition-colors">Projects</a>
+        <a href="/admin/users" class="text-dark hover:text-primary transition-colors">Users</a>
+        <div class="relative group">
+          <button class="flex items-center text-dark hover:text-primary transition-colors">
+            <span>{{ user.username }}</span>
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <div class="absolute right-0 w-48 mt-2 bg-white rounded-lg shadow-lg py-2 z-10 hidden group-hover:block">
+            <a href="/logout" class="block px-4 py-2 text-dark hover:bg-light hover:text-primary">Logout</a>
+          </div>
+        </div>
+      </div>
+
+      <button id="menu-btn" class="md:hidden text-2xl focus:outline-none">
+        ☰
+      </button>
+    </div>
+    <div id="mobile-menu" class="hidden md:hidden bg-white p-4 shadow-lg">
+      <div class="flex flex-col space-y-3">
+        <a href="/admin" class="text-dark hover:text-primary transition-colors py-2">Dashboard</a>
+        <a href="/admin/projects" class="text-dark hover:text-primary transition-colors py-2">Projects</a>
+        <a href="/admin/users" class="text-dark hover:text-primary transition-colors py-2">Users</a>
+        <a href="/logout" class="text-dark hover:text-primary transition-colors py-2">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Header -->
+  <header class="bg-white shadow-sm">
+    <div class="container mx-auto px-4 py-8">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 class="text-2xl md:text-3xl font-bold text-dark">Manage Projects</h1>
+          <p class="text-gray-600 mt-1">Review, approve, and manage all platform projects</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <main class="container mx-auto px-4 py-8">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="{% if category == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %} p-4 rounded-lg mb-6">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- Filters & Search -->
+    <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+      <form action="/admin/projects" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
+          <label for="search" class="block text-gray-700 mb-2">Search</label>
+          <input type="text" id="search" name="search" value="{{ request.args.get('search', '') }}" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Search by title...">
+        </div>
+        <div>
+          <label for="status" class="block text-gray-700 mb-2">Status</label>
+          <select id="status" name="status" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+            <option value="">All Statuses</option>
+            <option value="pending" {% if filter_status == 'pending' %}selected{% endif %}>Pending</option>
+            <option value="approved" {% if filter_status == 'approved' %}selected{% endif %}>Approved</option>
+            <option value="rejected" {% if filter_status == 'rejected' %}selected{% endif %}>Rejected</option>
+          </select>
+        </div>
+        <div>
+          <label for="category" class="block text-gray-700 mb-2">Category</label>
+          <select id="category" name="category" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+            <option value="">All Categories</option>
+            <option value="Technology">Technology</option>
+            <option value="Art">Art</option>
+            <option value="Food">Food</option>
+            <option value="Design">Design</option>
+            <option value="Games">Games</option>
+            <option value="Music">Music</option>
+            <option value="Film">Film</option>
+            <option value="Fashion">Fashion</option>
+            <option value="Publishing">Publishing</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="flex items-end">
+          <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors w-full">
+            Apply Filters
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Status Tabs -->
+    <div class="flex border-b border-gray-200 mb-6">
+      <a href="/admin/projects" class="py-2 px-4 text-center {% if not filter_status %}border-b-2 border-primary text-primary font-medium{% else %}text-gray-600 hover:text-primary{% endif %}">All</a>
+      <a href="/admin/projects?status=pending" class="py-2 px-4 text-center {% if filter_status == 'pending' %}border-b-2 border-primary text-primary font-medium{% else %}text-gray-600 hover:text-primary{% endif %}">Pending</a>
+      <a href="/admin/projects?status=approved" class="py-2 px-4 text-center {% if filter_status == 'approved' %}border-b-2 border-primary text-primary font-medium{% else %}text-gray-600 hover:text-primary{% endif %}">Approved</a>
+      <a href="/admin/projects?status=rejected" class="py-2 px-4 text-center {% if filter_status == 'rejected' %}border-b-2 border-primary text-primary font-medium{% else %}text-gray-600 hover:text-primary{% endif %}">Rejected</a>
+    </div>
+
+    <!-- Projects Table -->
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-8">
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-gray-50 text-gray-700">
+            <tr>
+              <th class="py-4 px-6 text-left font-medium">Project</th>
+              <th class="py-4 px-6 text-left font-medium">Owner</th>
+              <th class="py-4 px-6 text-left font-medium">Category</th>
+              <th class="py-4 px-6 text-left font-medium">Goal</th>
+              <th class="py-4 px-6 text-left font-medium">Status</th>
+              <th class="py-4 px-6 text-left font-medium">Created</th>
+              <th class="py-4 px-6 text-left font-medium">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            {% for project in projects %}
+            <tr class="hover:bg-gray-50">
+              <td class="py-4 px-6">
+                <a href="/admin/projects/{{ project.id }}" class="font-medium text-primary hover:underline">{{ project.title }}</a>
+              </td>
+              <td class="py-4 px-6">{{ project.creator.username }}</td>
+              <td class="py-4 px-6">{{ project.category }}</td>
+              <td class="py-4 px-6">₹{{ "%.2f"|format(project.goal) }}</td>
+              <td class="py-4 px-6">
+                <span class="{% if project.status == 'approved' %}bg-green-100 text-green-800{% elif project.status == 'pending' %}bg-yellow-100 text-yellow-800{% else %}bg-red-100 text-red-800{% endif %} px-2 py-1 rounded-full text-xs font-medium">
+                  {{ project.status }}
+                </span>
+              </td>
+              <td class="py-4 px-6">{{ project.created_at.strftime('%b %d, %Y') }}</td>
+              <td class="py-4 px-6">
+                <div class="flex space-x-2">
+                  <a href="/admin/projects/{{ project.id }}" class="bg-black text-white px-3 py-1 rounded-lg text-sm inline-flex items-center hover:bg-gray-800 transition-colors">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    View
+                  </a>
+                  {% if project.status == 'pending' %}
+                  <form action="/admin/projects/{{ project.id }}/approve" method="POST" class="inline">
+                    <button type="submit" class="text-green-600 hover:underline ml-2">Approve</button>
+                  </form>
+                  <form action="/admin/projects/{{ project.id }}/reject" method="POST" class="inline">
+                    <button type="submit" class="text-red-600 hover:underline ml-2">Reject</button>
+                  </form>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- No Projects Message -->
+    {% if not projects %}
+    <div class="bg-white rounded-xl shadow-sm p-8 text-center">
+      <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+      </svg>
+      <h3 class="text-xl font-semibold mb-2">No projects found</h3>
+      <p class="text-gray-600">No projects match your current filters.</p>
+    </div>
+    {% endif %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-gray-800 text-white py-6 mt-auto">
+    <div class="container mx-auto px-4">
+      <div class="text-center">
+        <p class="text-gray-400">&copy; 2025 SparkVest Admin Panel. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Mobile menu toggle
+    const menuBtn = document.getElementById('menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    
+    menuBtn.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+  </script>
+</body>
+</html> 

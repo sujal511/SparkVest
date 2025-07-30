@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ project.title }} - SparkVest</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4" crossorigin="anonymous"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3D5BA9',
+                        secondary: '#35D0BA',
+                        dark: '#1A2A43',
+                        light: '#F5F9FF',
+                        accent: '#FF7E5F'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'pulse-slow': 'pulse 3s infinite'
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-sans bg-gray-50 text-gray-800">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md py-4">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <a href="/" class="text-2xl font-bold text-primary flex items-center">
+                <span class="text-accent">✦</span>
+                <span class="ml-2">SparkVest</span>
+            </a>
+            <div class="hidden md:flex space-x-6">
+                <a href="/" class="text-gray-700 hover:text-primary">Home</a>
+                <a href="/explore" class="text-gray-700 hover:text-primary">Explore</a>
+                <a href="/browse-ideas" class="text-gray-700 hover:text-primary">Browse Ideas</a>
+                <a href="/dashboard" class="text-gray-700 hover:text-primary">Dashboard</a>
+            </div>
+            <div class="flex space-x-4">
+                {% if user %}
+                <a href="/dashboard" class="text-gray-700 hover:text-primary">{{ user.username }}</a>
+                <a href="/logout" class="text-gray-700 hover:text-primary">Logout</a>
+                {% else %}
+                <a href="/login" class="text-gray-700 hover:text-primary">Log In</a>
+                <a href="/register" class="bg-primary text-white px-4 py-2 rounded hover:bg-blue-600 transition">Sign Up</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Project Details -->
+    <main class="container mx-auto px-4 py-8 animate-fade-in">
+        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+            <!-- Project Header -->
+            <div class="relative">
+                {% if project.image_url %}
+                <img src="{{ project.image_url }}" alt="{{ project.title }}" class="w-full h-64 md:h-80 object-cover">
+                {% else %}
+                <div class="w-full h-64 md:h-80 bg-gradient-to-r from-primary to-secondary flex items-center justify-center">
+                    <h1 class="text-4xl font-bold text-white">{{ project.title }}</h1>
+                </div>
+                {% endif %}
+                
+                <!-- Status Badge -->
+                <div class="absolute top-4 right-4 px-3 py-1 rounded-full text-sm font-medium {% if project.days_remaining > 0 %}bg-accent text-white{% else %}bg-gray-500 text-white{% endif %}">
+                    {% if project.days_remaining > 0 %}
+                        {{ project.days_remaining }} days left
+                    {% else %}
+                        Ended
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="p-6 md:p-8">
+                <div class="flex flex-col md:flex-row justify-between">
+                    <div class="md:w-2/3 pr-0 md:pr-8">
+                        <h1 class="text-3xl font-bold mb-4">{{ project.title }}</h1>
+                        
+                        <!-- Return type badge -->
+                        <div class="mb-4">
+                            {% if project.return_type == 'stake' %}
+                            <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium inline-flex items-center">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Equity Stake
+                            </span>
+                            {% else %}
+                            <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium inline-flex items-center">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10" />
+                                </svg>
+                                Reward-Based
+                            </span>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Short description -->
+                        {% if project.short_description %}
+                        <p class="text-lg text-gray-600 mb-6">{{ project.short_description }}</p>
+                        {% endif %}
+                        
+                        <!-- Creator info -->
+                        <div class="flex items-center mb-6">
+                            <div class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center">
+                                {{ project.creator.username[0] }}
+                            </div>
+                            <div class="ml-3">
+                                <p class="font-medium">{{ project.creator.username }}</p>
+                                <p class="text-sm text-gray-500">Idea Owner</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Category -->
+                        {% if project.category %}
+                        <div class="mb-6">
+                            <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                                {{ project.category }}
+                            </span>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Main description -->
+                        <div class="prose max-w-none mb-8">
+                            <h2 class="text-xl font-bold mb-4">About this Project</h2>
+                            <p class="whitespace-pre-line">{{ project.description }}</p>
+                        </div>
+                        
+                        <!-- Additional sections -->
+                        {% if project.team_info %}
+                        <div class="mb-8">
+                            <h2 class="text-xl font-bold mb-4">Team</h2>
+                            <p class="whitespace-pre-line">{{ project.team_info }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if project.market_opportunity %}
+                        <div class="prose max-w-none mb-8">
+                            <h2 class="text-xl font-bold mb-4">Market Opportunity</h2>
+                            <p class="whitespace-pre-line">{{ project.market_opportunity }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if project.use_of_funds %}
+                        <div class="prose max-w-none mb-8">
+                            <h2 class="text-xl font-bold mb-4">Use of Funds</h2>
+                            <p class="whitespace-pre-line">{{ project.use_of_funds }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if project.market_opportunity %}
+                        <div class="prose max-w-none mb-8">
+                            <h2 class="text-xl font-bold mb-4">Market Opportunity</h2>
+                            <p class="whitespace-pre-line">{{ project.market_opportunity }}</p>
+                        </div>
+                        {% endif %}
+
+                        {% if project.additional_info %}
+                        <div class="prose max-w-none mb-8">
+                            <h2 class="text-xl font-bold mb-4">Additional Information</h2>
+                            <p class="whitespace-pre-line">{{ project.additional_info }}</p>
+                        </div>
+                        {% endif %}
+
+                        {% if project.stake_terms and project.return_type == 'stake' %}
+                        <div class="mb-8 bg-blue-50 p-4 rounded-lg border border-blue-100">
+                            <h2 class="text-xl font-bold mb-4 text-blue-900">Equity Stake Terms</h2>
+                            <p class="whitespace-pre-line text-blue-800">{{ project.stake_terms }}</p>
+                        </div>
+                        {% endif %}
+
+                        <!-- Additional Media Section -->
+                        <div class="prose max-w-none mb-8">
+                            <h2 class="text-xl font-bold mb-4">Additional Media</h2>
+
+                            <!-- YouTube Video -->
+                            {% if project.video_url %}
+                            <div class="mb-6">
+                                <h3 class="text-lg font-semibold mb-3">Project Video</h3>
+                                <div class="aspect-w-16 aspect-h-9">
+                                    {% if 'youtube.com' in project.video_url or 'youtu.be' in project.video_url %}
+                                        {% set youtube_id = project.video_url.split('v=')[1].split('&')[0] if 'v=' in project.video_url else project.video_url.split('/')[-1] %}
+                                        <iframe src="https://www.youtube.com/embed/{{ youtube_id }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="w-full h-64 rounded-lg"></iframe>
+                                    {% else %}
+                                        <a href="{{ project.video_url }}" target="_blank" class="text-primary hover:underline">View project video</a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Additional Images -->
+                            {% if project.additional_images %}
+                            <div class="mb-6">
+                                <h3 class="text-lg font-semibold mb-3">Project Gallery</h3>
+                                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                    {% for image_url in project.additional_images.split(',') %}
+                                        <div class="overflow-hidden rounded-lg border border-gray-200">
+                                            <a href="{{ image_url }}" target="_blank" class="block">
+                                                <img src="{{ image_url }}" alt="Additional project image" class="w-full h-40 object-cover hover:opacity-90 transition">
+                                            </a>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Research Report -->
+                            {% if project.research_report_url %}
+                            <div class="mb-6">
+                                <h3 class="text-lg font-semibold mb-3">Research Report</h3>
+                                <div class="border border-gray-200 rounded-lg p-4 flex justify-between items-center bg-gray-50">
+                                    <div class="flex items-center">
+                                        <svg class="w-8 h-8 text-primary" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-14v7.17l-2.59-2.58L7 12l5 5 5-5-1.41-1.41L13 13.17V6h-2z"/>
+                                        </svg>
+                                        <span class="ml-2 font-medium">Research Report</span>
+                                    </div>
+                                    <a href="{{ project.research_report_url }}" download class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition">Download Report</a>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Funding sidebar -->
+                    <div class="md:w-1/3 mt-8 md:mt-0">
+                        <div class="bg-gray-50 rounded-xl p-6 border border-gray-200 sticky top-6">
+                            <h2 class="text-2xl font-bold mb-2">₹{{ "%.2f"|format(project.current_amount) }}</h2>
+                            <p class="text-gray-600 mb-4">raised of ₹{{ "%.2f"|format(project.goal) }} goal</p>
+                            
+                            <!-- Progress bar -->
+                            <div class="mb-6">
+                                <div class="h-3 bg-gray-200 rounded-full">
+                                    {% if project.progress_percentage > 50 %}
+    <div class="h-full rounded-full bg-green-500" style="width: {{ project.progress_percentage|default(0) }}%;"></div>
+{% else %}
+    <div class="h-full rounded-full bg-secondary" style="width: {{ project.progress_percentage|default(0) }}%;"></div>
+{% endif %}
+
+                                </div>
+                                <div class="flex justify-between mt-2 text-sm">
+                                    <span>{{ project.progress_percentage }}% funded</span>
+                                    {% if project.is_funded %}
+                                    <span class="text-green-600 font-medium">Funded!</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <!-- Project stats -->
+                            <div class="grid grid-cols-2 gap-4 mb-6">
+                                <div>
+                                    <p class="text-sm text-gray-500">Start Date</p>
+                                    <p class="font-medium">{{ project.start_date.strftime('%b %d, %Y') }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500">End Date</p>
+                                    <p class="font-medium">{{ project.end_date.strftime('%b %d, %Y') }}</p>
+                                </div>
+                            </div>
+                            
+                            <!-- User action buttons -->
+                            {% if user.id != project.user_id and user.user_type == 'investor' and project.days_remaining > 0 and project.status == 'approved' %}
+                                {% if user_investment %}
+                                    <div class="mb-4 bg-green-100 border border-green-300 text-green-700 p-4 rounded-lg">
+                                        <p class="font-medium">You've invested ₹{{ "%.2f"|format(user_investment.amount) }}</p>
+                                        <p class="text-sm">Thank you for your support!</p>
+                                    </div>
+                                    {% if project.return_type == 'stake' and user_investment.certificate_url %}
+                                    <a href="{{ user_investment.certificate_url }}" download class="block w-full bg-blue-600 text-white text-center py-3 rounded-lg hover:bg-blue-700 transition mb-3">
+                                        <div class="flex items-center justify-center">
+                                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                            Download Stake Certificate
+                                        </div>
+                                    </a>
+                                    {% endif %}
+                                    <a href="{{ url_for('invest', project_id=project.id) }}" class="block w-full bg-black text-white text-center py-3 rounded-lg hover:bg-blue-600 transition">
+                                        Invest More
+                                    </a>
+                                {% else %}
+                                    <a href="{{ url_for('invest', project_id=project.id) }}" class="block w-full bg-black text-white text-center py-3 rounded-lg hover:bg-blue-600 transition">
+                                        Invest Now
+                                    </a>
+                                {% endif %}
+                            {% elif user.id == project.user_id %}
+                                <a href="/projects/{{ project.id }}/edit" class="block w-full bg-black text-white text-center py-3 rounded-lg hover:bg-blue-600 transition mb-3">
+                                    Edit Project
+                                </a>
+                            {% elif project.days_remaining <= 0 %}
+                                <div class="bg-gray-100 border border-gray-300 text-gray-700 p-4 rounded-lg text-center">
+                                    <p class="font-medium">This project has ended</p>
+                                </div>
+                            {% elif project.status != 'approved' %}
+                                <div class="bg-yellow-100 border border-yellow-300 text-yellow-700 p-4 rounded-lg text-center">
+                                    <p class="font-medium">This project is pending approval</p>
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Share -->
+                            <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <a href="{{ url_for('invest', project_id=project.id) }}" class="bg-black text-white font-medium text-center py-3 px-6 rounded-lg hover:bg-primary/90 transition shadow-md flex items-center justify-center">
+                                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6a2 2 0 01-2-2V4a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2h-6m0 0h6a2 2 0 012 2v-2a2 2 0 01-2-2m0 0h-6a2 2 0 01-2-2m0 0h6v-2a2 2 0 012-2m0 0h-6a2 2 0 012-2m0 0h6v2a2 2 0 012 2m0 0h-6a2 2 0 01-2 2v-2a2 2 0 012-2m-6 0h6a2 2 0 012 2v-2a2 2 0 01-2-2m0 0h-6a2 2 0 01-2-2m0 0h6v2a2 2 0 01-2 2m0 0h-6a2 2 0 012-2v2a2 2 0 01-2 2m0 0h6a2 2 0 012 2v-2a2 2 0 01-2-2m0 0h-6a2 2 0 01-2-2m0 0h6v2a2 2 0 012 2m0 0h-6a2 2 0 01-2 2" />
+                                    </svg>
+                                    Back This Project
+                                </a>
+                                <button class="bg-black text-white font-medium py-3 px-6 rounded-lg border-2 border-gray-800 hover:bg-gray-800 transition shadow-md flex items-center justify-center share-btn">
+                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                                    </svg>
+                                    Share Project
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Community Discussion Section -->
+    <section class="container mx-auto px-4 py-8 mb-16">
+        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="p-6 md:p-8">
+                <h2 class="text-2xl font-bold mb-6">Community Discussion</h2>
+                
+                <!-- New Comment Form -->
+                <div class="mb-8">
+                    <form action="{{ url_for('project_comments', project_id=project.id) }}" method="POST" class="space-y-4">
+                        <div>
+                            <label for="content" class="block text-sm font-medium text-gray-700 mb-1">Share your thoughts</label>
+                            <textarea id="content" name="content" rows="3" required
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                                    placeholder="What do you think about this project?"></textarea>
+                        </div>
+                        <div class="flex justify-end">
+                            <button type="submit" class="bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition shadow-md">
+                                Post Comment
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Comments List -->
+                <div class="space-y-6">
+                    {% if comments %}
+                        {% for comment in comments %}
+                            <div class="border border-gray-200 rounded-lg p-4" id="comment-{{ comment.id }}">
+                                <!-- Comment Header -->
+                                <div class="flex items-start justify-between mb-2">
+                                    <div class="flex items-center">
+                                        <div class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-bold">
+                                            {{ comment.user.username[0] | upper }}
+                                        </div>
+                                        <div class="ml-3">
+                                            <p class="font-medium">{{ comment.user.username }}</p>
+                                            <p class="text-sm text-gray-500">{{ comment.created_at.strftime('%d %b %Y, %I:%M %p') }}</p>
+                                        </div>
+                                    </div>
+                                    
+                                    {% if comment.user_id == user.id or user.user_type == 'admin' %}
+                                    <div class="relative group">
+                                        <button class="text-gray-400 hover:text-gray-600">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <div class="absolute right-0 hidden group-hover:block bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-10 w-32">
+                                            <form action="{{ url_for('delete_comment', comment_id=comment.id) }}" method="POST">
+                                                <button type="submit" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Delete</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Comment Content -->
+                                <div class="mb-3">
+                                    <p class="text-gray-800">{{ comment.content }}</p>
+                                </div>
+                                
+                                <!-- Comment Actions -->
+                                <div class="flex items-center mb-3">
+                                    <button class="like-button flex items-center text-gray-500 hover:text-primary" 
+                                            data-comment-id="{{ comment.id }}" 
+                                            data-liked="{{ 'true' if comment.user_liked else 'false' }}">
+                                        <i class="far {{ 'fas text-primary' if comment.user_liked else 'far' }} fa-heart mr-1"></i>
+                                        <span class="like-count">{{ comment.like_count }}</span>
+                                    </button>
+                                    <button class="ml-4 text-gray-500 hover:text-primary reply-toggle" data-comment-id="{{ comment.id }}">
+                                        <i class="far fa-comment mr-1"></i> Reply
+                                    </button>
+                                </div>
+                                
+                                <!-- Reply Form (hidden by default) -->
+                                <div class="hidden mb-4 reply-form" id="reply-form-{{ comment.id }}">
+                                    <form action="{{ url_for('reply_to_comment', comment_id=comment.id) }}" method="POST" class="space-y-3">
+                                        <div>
+                                            <textarea name="content" rows="2" required
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                                                    placeholder="Write a reply..."></textarea>
+                                        </div>
+                                        <div class="flex justify-end">
+                                            <button type="button" class="bg-gray-200 text-gray-800 px-4 py-1 rounded-lg mr-2 cancel-reply">Cancel</button>
+                                            <button type="submit" class="bg-black text-white px-4 py-1 rounded-lg">Reply</button>
+                                        </div>
+                                    </form>
+                                </div>
+                                
+                                <!-- Replies -->
+                                {% if comment.replies.count() > 0 %}
+                                <div class="ml-8 mt-4 space-y-4 border-l-2 border-gray-200 pl-4">
+                                    {% for reply in comment.replies %}
+                                    <div class="border border-gray-200 rounded-lg p-3" id="comment-{{ reply.id }}">
+                                        <!-- Reply Header -->
+                                        <div class="flex items-start justify-between mb-2">
+                                            <div class="flex items-center">
+                                                <div class="w-8 h-8 bg-secondary text-white rounded-full flex items-center justify-center font-bold text-sm">
+                                                    {{ reply.user.username[0] | upper }}
+                                                </div>
+                                                <div class="ml-2">
+                                                    <p class="font-medium text-sm">{{ reply.user.username }}</p>
+                                                    <p class="text-xs text-gray-500">{{ reply.created_at.strftime('%d %b %Y, %I:%M %p') }}</p>
+                                                </div>
+                                            </div>
+                                            
+                                            {% if reply.user_id == user.id or user.user_type == 'admin' %}
+                                            <div class="relative group">
+                                                <button class="text-gray-400 hover:text-gray-600">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </button>
+                                                <div class="absolute right-0 hidden group-hover:block bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-10 w-32">
+                                                    <form action="{{ url_for('delete_comment', comment_id=reply.id) }}" method="POST">
+                                                        <button type="submit" class="w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-gray-100">Delete</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <!-- Reply Content -->
+                                        <div class="mb-2">
+                                            <p class="text-gray-800 text-sm">{{ reply.content }}</p>
+                                        </div>
+                                        
+                                        <!-- Reply Actions -->
+                                        <div class="flex items-center">
+                                            <button class="like-button flex items-center text-gray-500 hover:text-primary text-sm" 
+                                                    data-comment-id="{{ reply.id }}" 
+                                                    data-liked="{{ 'true' if reply.user_liked else 'false' }}">
+                                                <i class="far {{ 'fas text-primary' if reply.user_liked else 'far' }} fa-heart mr-1"></i>
+                                                <span class="like-count">{{ reply.like_count }}</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-10 border border-gray-200 rounded-lg">
+                            <p class="text-gray-500">Be the first to start a discussion about this project!</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Members Section -->
+    {% if project.team_members or project.custom_team_members %}
+    <div class="bg-white rounded-xl shadow-md overflow-hidden mt-8">
+        <div class="p-6 md:p-8">
+            <h2 class="text-2xl font-bold mb-6">Team Members</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Registered Team Members -->
+                {% if project.team_members %}
+                {% for member in project.team_members %}
+                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    {% if member.name %}
+                    <h3 class="font-bold text-lg">{{ member.name }}</h3>
+                    {% else %}
+                    <h3 class="font-bold text-lg">Team Member</h3>
+                    {% endif %}
+                    <p class="text-gray-600">{{ member.role }}</p>
+                    {% if member.linkedin_profile %}
+                    <a href="{{ member.linkedin_profile }}" target="_blank" class="text-primary hover:underline text-sm mt-2 inline-block">
+                        <svg class="w-4 h-4 inline-block mr-1" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                        </svg>
+                        LinkedIn Profile
+                    </a>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                {% endif %}
+                
+                <!-- Custom Team Members -->
+                {% if project.custom_team_members %}
+                    {% for member in project.custom_team_members.split('|') %}
+                        {% set member_data = member.split(',') %}
+                        {% if member_data|length >= 2 %}
+                        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                            <h3 class="font-bold text-lg">{{ member_data[0] }}</h3>
+                            <p class="text-gray-600">{{ member_data[1] }}</p>
+                            {% if member_data|length > 2 and member_data[2] %}
+                                <a href="{{ member_data[2] }}" target="_blank" class="text-primary hover:underline text-sm mt-2 inline-block">
+                                    <svg class="w-4 h-4 inline-block mr-1" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                                    </svg>
+                                    LinkedIn Profile
+                                </a>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 mt-16">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">SparkVest</h3>
+                    <p class="text-gray-400">Fund your dreams, invest in the future.</p>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold mb-4">About</h4>
+                    <ul class="space-y-2">
+                        <li><a href="/about" class="text-gray-400 hover:text-white">Our Story</a></li>
+                        <li><a href="/team" class="text-gray-400 hover:text-white">Team</a></li>
+                        <li><a href="/careers" class="text-gray-400 hover:text-white">Careers</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold mb-4">Resources</h4>
+                    <ul class="space-y-2">
+                        <li><a href="/blog" class="text-gray-400 hover:text-white">Blog</a></li>
+                        <li><a href="/faq" class="text-gray-400 hover:text-white">FAQ</a></li>
+                        <li><a href="/contact" class="text-gray-400 hover:text-white">Contact Us</a></li>
+                        <li><a href="/admin" class="text-gray-400 hover:text-white">Admin Panel</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold mb-4">Connect</h4>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                            </svg>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10" />
+                            </svg>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723 10.016 10.016 0 01-3.127 1.195 4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.16a4.894 4.894 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.937 4.937 0 004.604 3.417 9.868 9.868 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.054 0 13.999-7.496 13.999-13.986 0-.209 0-.42-.015-.63a9.936 9.936 0 002.46-2.548l-.047-.02z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 pt-8 border-t border-gray-700 text-center text-gray-400">
+                <p>&copy; 2025 SparkVest. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Add animation script -->
+    <script>
+        // Mobile menu toggle with animation
+        const menuBtn = document.getElementById('menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        menuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            if (!mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.add('animate-slide-up');
+            }
+        });
+        
+        // Animate progress bar on load
+        document.addEventListener('DOMContentLoaded', function() {
+            const progressBar = document.querySelector('.bg-primary, .bg-green-500, .bg-secondary');
+            const width = progressBar.style.width;
+            progressBar.style.width = '0';
+            setTimeout(() => {
+                progressBar.style.width = width;
+            }, 300);
+        });
+
+        // Community section functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Like button functionality
+            const likeButtons = document.querySelectorAll('.like-button');
+            likeButtons.forEach(button => {
+                button.addEventListener('click', async function() {
+                    const commentId = this.getAttribute('data-comment-id');
+                    const isLiked = this.getAttribute('data-liked') === 'true';
+                    const icon = this.querySelector('i');
+                    const likeCount = this.querySelector('.like-count');
+                    
+                    try {
+                        const response = await fetch(`/comments/${commentId}/like`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                        });
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            
+                            // Update UI
+                            if (data.liked) {
+                                icon.classList.remove('far');
+                                icon.classList.add('fas', 'text-primary');
+                                this.setAttribute('data-liked', 'true');
+                            } else {
+                                icon.classList.remove('fas', 'text-primary');
+                                icon.classList.add('far');
+                                this.setAttribute('data-liked', 'false');
+                            }
+                            
+                            likeCount.textContent = data.count;
+                        }
+                    } catch (error) {
+                        console.error('Error liking comment:', error);
+                    }
+                });
+            });
+            
+            // Reply toggle functionality
+            const replyToggleButtons = document.querySelectorAll('.reply-toggle');
+            replyToggleButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const commentId = this.getAttribute('data-comment-id');
+                    const replyForm = document.getElementById(`reply-form-${commentId}`);
+                    replyForm.classList.toggle('hidden');
+                });
+            });
+            
+            // Cancel reply buttons
+            const cancelReplyButtons = document.querySelectorAll('.cancel-reply');
+            cancelReplyButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const replyForm = this.closest('.reply-form');
+                    replyForm.classList.add('hidden');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

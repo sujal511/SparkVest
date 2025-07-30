@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SparkVest - Fund Your Dreams</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwindcss.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3D5BA9',
+                        secondary: '#35D0BA',
+                        dark: '#1A2A43',
+                        light: '#F5F9FF',
+                        accent: '#FF7E5F'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'pulse-slow': 'pulse 3s infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        }
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        .hero-pattern {
+            background-color: #f7fafc;
+            background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23d1d5db' fill-opacity='0.4' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E");
+        }
+    </style>
+</head>
+<body class="font-sans bg-gray-50 text-gray-800">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md py-4">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <a href="/" class="text-2xl font-bold text-primary flex items-center">
+                <span class="text-accent">✦</span>
+                <span class="ml-2">SparkVest</span>
+            </a>
+            <div class="hidden md:flex space-x-6">
+                <a href="/" class="text-gray-700 hover:text-primary">Home</a>
+                <a href="/explore" class="text-gray-700 hover:text-primary">Explore</a>
+                <a href="/how-it-works" class="text-gray-700 hover:text-primary">How It Works</a>
+                <a href="/about" class="text-gray-700 hover:text-primary">About</a>
+            </div>
+            <div class="flex space-x-4">
+                <a href="/login" class="text-gray-700 hover:text-primary font-medium">Log In</a>
+                <a href="/register" class="bg-black text-white px-4 py-2 rounded hover:bg-primary/80 transition shadow-md">Sign Up</a>
+            </div>
+            <button id="menu-btn" class="md:hidden text-2xl focus:outline-none focus:ring-2 focus:ring-primary rounded p-1 transition-colors hover:bg-light">
+                ☰
+            </button>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="md:hidden hidden bg-white py-2 px-4">
+            <a href="/" class="block py-2 text-gray-700 hover:text-primary">Home</a>
+            <a href="/explore" class="block py-2 text-gray-700 hover:text-primary">Explore</a>
+            <a href="/how-it-works" class="block py-2 text-gray-700 hover:text-primary">How It Works</a>
+            <a href="/about" class="block py-2 text-gray-700 hover:text-primary">About</a>
+            <div class="mt-4 flex flex-col space-y-2">
+                <a href="/login" class="block py-2 text-gray-700 hover:text-primary">Log In</a>
+                <a href="/register" class="block bg-primary text-white px-4 py-2 rounded hover:bg-blue-600 transition text-center">Sign Up</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative bg-gradient-to-br from-primary to-dark py-20 text-white animate-fade-in">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-center justify-between">
+                <div class="md:w-1/2 mb-8 md:mb-0">
+                    <h1 class="text-4xl md:text-5xl font-bold mb-4 text-gray-800">Fund Your Dreams with <span class="text-primary">SparkVest</span></h1>
+                    <p class="text-lg text-gray-600 mb-8">Connect with investors who believe in your vision. Launch your project and turn your ideas into reality.</p>
+                    <div class="flex flex-col sm:flex-row gap-4 mt-8">
+                        <a href="/register" class="bg-black text-white font-medium px-6 py-3 rounded-lg border border-primary hover:bg-primary/90 transition shadow-lg">Start Your Project</a>
+                        <a href="/explore" class="bg-black text-white font-medium px-6 py-3 rounded-lg border-2 border-primary hover:bg-gray-800 transition shadow-lg">Explore Projects</a>
+                    </div>
+                </div>
+                <div class="md:w-1/2">
+                    <img src="{{ url_for('static', filename='uploads/bullion-932218.jpg') }}" alt="SparkVest Platform" class="rounded-lg shadow-xl" />
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Projects -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold mb-2 text-center">Featured Projects</h2>
+            <p class="text-gray-600 mb-12 text-center">Discover innovative ideas worth investing in</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                {% for project in projects %}
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200 hover:shadow-xl transition">
+                    {% if project.image_url %}
+                    <img src="{{ project.image_url }}" alt="{{ project.title }}" class="w-full h-48 object-cover" />
+                    {% else %}
+                    <img src="{{ url_for('static', filename='uploads/aiimg.jpg') }}" alt="{{ project.title }}" class="w-full h-48 object-cover" />
+                    {% endif %}
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">{{ project.title }}</h3>
+                        <p class="text-gray-600 mb-4 line-clamp-2">{{ project.description }}</p>
+                        <div class="mb-4">
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div class="bg-primary h-2.5 rounded-full progress-bar" data-progress="{{ (project.current_amount / project.goal) * 100 }}"></div>
+                            </div>
+                            <div class="flex justify-between mt-2 text-sm text-gray-600">
+                                <span>₹{{ project.current_amount }}</span>
+                                <span>{{ (project.current_amount / project.goal) * 100 }}% of ₹{{ project.goal }}</span>
+                            </div>
+                        </div>
+                        <a href="/project/{{ project.id }}" class="block w-full bg-black text-white font-medium text-center py-2 rounded hover:bg-primary/90 transition shadow-sm">View Project</a>
+                    </div>
+                </div>
+                {% else %}
+                <div class="col-span-4 text-center py-10">
+                    <p class="text-gray-500">No featured projects yet!</p>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="mt-12 text-center">
+                <a href="/explore" class="inline-block bg-black text-white font-medium px-6 py-3 rounded-lg hover:bg-gray-800 transition border border-primary shadow-sm">View All Projects</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="py-16 bg-gray-100">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold mb-2 text-center">How SparkVest Works</h2>
+            <p class="text-gray-600 mb-12 text-center">Simple steps to bring your idea to life</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white p-8 rounded-lg shadow-md text-center">
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-primary text-2xl font-bold">1</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Create Your Project</h3>
+                    <p class="text-gray-600">Submit your project details, funding goals, and timeline to get started.</p>
+                </div>
+                
+                <div class="bg-white p-8 rounded-lg shadow-md text-center">
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-primary text-2xl font-bold">2</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Share Your Story</h3>
+                    <p class="text-gray-600">Tell potential investors about your vision and why they should support you.</p>
+                </div>
+                
+                <div class="bg-white p-8 rounded-lg shadow-md text-center">
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-primary text-2xl font-bold">3</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Get Funded</h3>
+                    <p class="text-gray-600">Receive investments from backers who believe in your project.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-16 bg-primary text-white">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-3xl font-bold mb-4">Ready to Launch Your Project?</h2>
+            <p class="text-lg mb-8 max-w-2xl mx-auto">Join thousands of creators who have successfully funded their projects on SparkVest.</p>
+            <a href="/register" class="inline-block bg-black text-white font-medium px-8 py-3 rounded-lg hover:bg-accent/90 transition shadow-md">Get Started Today</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">SparkVest</h3>
+                    <p class="text-gray-400">Fund your dreams, invest in the future.</p>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold mb-4">About</h4>
+                    <ul class="space-y-2">
+                        <li><a href="/about" class="text-gray-400 hover:text-white">Our Story</a></li>
+                        <li><a href="/team" class="text-gray-400 hover:text-white">Team</a></li>
+                        <li><a href="/careers" class="text-gray-400 hover:text-white">Careers</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold mb-4">Resources</h4>
+                    <ul class="space-y-2">
+                        <li><a href="/blog" class="text-gray-400 hover:text-white">Blog</a></li>
+                        <li><a href="/faq" class="text-gray-400 hover:text-white">FAQ</a></li>
+                        <li><a href="/contact" class="text-gray-400 hover:text-white">Contact Us</a></li>
+                        <li><a href="/admin" class="text-gray-400 hover:text-white">Admin Panel</a></li>
+                        <li><a href="/terms-and-conditions" class="text-gray-400 hover:text-white">Terms & Conditions</a></li>
+                        <li><a href="/privacy-policy" class="text-gray-400 hover:text-white">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold mb-4">Connect</h4>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                            </svg>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723 10.016 10.016 0 01-3.127 1.195 4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.16a4.894 4.894 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.937 4.937 0 004.604 3.417 9.868 9.868 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.054 0 13.999-7.496 13.999-13.986 0-.209 0-.42-.015-.63a9.936 9.936 0 002.46-2.548l-.047-.02z"/>
+                            </svg>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+                            </svg>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 pt-8 border-t border-gray-700 text-center text-gray-400">
+                <p>&copy; 2025 SparkVest. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle with animation
+        const menuBtn = document.getElementById('menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        menuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            if (!mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.add('animate-slide-up');
+            }
+        });
+        
+        // Set progress bar widths
+        document.querySelectorAll('.progress-bar').forEach(bar => {
+            const progress = bar.getAttribute('data-progress');
+            bar.style.width = progress + '%';
+        });
+    </script>
+</body>
+</html>
