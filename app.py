@@ -51,3 +51,9 @@ if __name__ == '__main__':
         db.create_all()
     app.run(debug=True, host='0.0.0.0', port=8000)
 
+# Ensure tables are created on Render or production
+import os
+if os.environ.get('RENDER'):
+    with app.app_context():
+        db.create_all()
+
