@@ -45,6 +45,7 @@ google = oauth.register(
 
 # Import routes after app and oauth is initialized to avoid circular imports
 from routes import *
+from models import Project
 
 if __name__ == '__main__':
     with app.app_context():
